@@ -30,7 +30,7 @@ export HELLO_ASSO_CLIENT_SECRET="your-client-secret"
 
 ### Option B - secrets file
 
-Create a JSON file somewhere outside the repository:
+Create a JSON file somewhere outside the repository (or within the ignored `.secrets` folder ; e.g: `.secrets\helloasso.secrets` which won't be committed)
 
 ```json
 {
@@ -43,6 +43,7 @@ Then point to it, either directly in `appsettings.json` or via an environment
 variable that the configuration substitutes at runtime:
 
 ```bash
+# Note that the filepath should be an absolute path
 export HELLO_ASSO_SECRETS_FILE="/path/to/helloasso-secrets.json"
 ```
 

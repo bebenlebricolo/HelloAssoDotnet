@@ -8,7 +8,7 @@ public record FormLightModel
     /// <summary>
     /// Banner of the said form
     /// </summary>
-    public string? Banner { get; set; }
+    public Logo? Banner { get; set; }
 
     /// <summary>
     /// Original currency used for this form
@@ -41,9 +41,9 @@ public record FormLightModel
     public DateTime? EndDate {get;set;} = DateTime.Now;
 
     /// <summary>
-    /// Form's logo
+    /// Form's logo (changed from a raw string to an actual data structure)
     /// </summary>
-    public string? Logo {get;set;}
+    public Logo? Logo {get;set;}
 
     /// <summary>
     /// Form's title (optional ?)
