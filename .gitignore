@@ -1,0 +1,22 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea
+.vscode
+.vs
+*.csproj.user
+
+**.autosave*
+.pytest_cache
+.secrets
+.runsettings
+**/TestResults**
+
+# Nuget packages
+*.nupkg
+*.packages
+
+*.autosave.*
+diff.txt

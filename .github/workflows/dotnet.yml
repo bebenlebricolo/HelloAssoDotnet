@@ -1,0 +1,104 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET Build and Test
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches: [ "main" ]
+    paths:
+      - '**'
+
+  workflow_dispatch:
+  release:
+    types: [published]
+
+  pull_request:
+    types: [closed, synchronize, opened, reopened]
+    branches: [ "main" ]
+
+defaults:
+  run:
+    shell: bash
+
+# Required for Github actions to generate a GITHUB_TOKEN with sufficient permissions to publish nuget packages
+# to github artifacts repositories
+# https://github.com/actions/checkout/issues/254#issuecomment-2458840060 <<<< Heck !
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      id-token: write # to enable use of OIDC for npm provenance
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name : Authenticate to Github NuGet Package registry
+      run: |
+        dotnet nuget add source --username bebenlebricolo \
+        --password ${{ secrets.GITHUB_TOKEN }} \
+        --store-password-in-clear-text \
+        --name github "https://nuget.pkg.github.com/bebenlebricolo/index.json"
+
+    - name: Restore dependencies
+      run: dotnet restore HelloAssoDotnet.sln
+
+    - name: Build
+      run: dotnet build --no-restore HelloAssoDotnet.sln -c Release
+
+    - name: Test
+      run: |
+        dotnet test HelloAssoDotnetTest/HelloAssoDotnetTest.csproj -l:nunit -c Release --verbosity normal
+
+    - name: Archive HelloAssoDotnetTest Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-helloassodotnet
+        path: HelloAssoDotnetTest/TestResults/TestResults.xml
+
+    # Development packages are built when merging to main branch, releases are built when tags are pushed to main branch.
+    - name : Pack projects as NuGet packages
+      if: github.event.pull_request.merged == true || contains(github.ref, 'refs/tags/v')
+      shell: bash
+      run: |
+        latest_tag=$(git describe --abbrev=0 --tags 2> /dev/null) || true
+        if [[ ! $latest_tag ]] ; then
+          latest_tag="v0.0.1"
+        fi
+
+        # Stripping the 'v' before the tag name
+        latest_tag=$(echo "$latest_tag" | cut -d 'v' -f 2)
+
+        # We are sitting on a tag -> publish release !
+        if [[ "${{ github.ref}}" = *"$latest_tag"* ]] ; then
+          echo "Packaging release version $latest_tag"
+          dotnet pack -o Packages -c Release -p:PackageVersion=$latest_tag --include-symbols
+        else
+          suffix="dev-${{ github.run_id }}"
+          echo "Packaging development version $latest_tag-$suffix"
+          dotnet pack -o Packages -c Release -p:PackageVersion=$latest_tag-$suffix --include-symbols
+          #                                                                ^
+          #                                                                Note : --version-suffix seems to be overriden by the PackageVersion msbuild
+        fi
+
+    - name : Publish NuGet Package
+      if: github.event.pull_request.merged == true || contains(github.ref, 'refs/tags/v')
+      shell: bash
+      run : |
+        for file in Packages/*.nupkg
+          do echo "Pushing" $file
+          dotnet nuget push $file --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+          done

@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "currency": "EUR",
+      "description": "Test form description 1",
+      "meta": {
+        "createdAt": "2024-10-21T13:59:37.727+02:00",
+        "updatedAt": "2024-10-21T14:00:01.243+02:00"
+      },
+      "state": "Private",
+      "title": "Test form title 1",
+      "widgetButtonUrl": "https://www.somewhere.com/test-form-1/widget-bouton",
+      "widgetFullUrl": "https://www.somewhere.com/test-form-1/widget",
+      "widgetVignetteHorizontalUrl": "https://www.somewhere.com/test-form-1/widget-vignette-horizontale",
+      "widgetVignetteVerticalUrl": "https://www.somewhere.com/test-form-1/widget-vignette",
+      "formSlug": "test-form-1",
+      "formType": "Event",
+      "url": "https://www.somewhere.com/test-form-1",
+      "organizationSlug": "test-org"
+    },
+    {
+      "currency": "EUR",
+      "description": "Test form description 2",
+      "meta": {
+        "createdAt": "2024-09-13T10:31:18.087+02:00",
+        "updatedAt": "2024-09-23T13:23:23.37+02:00"
+      },
+      "state": "Private",
+      "title": "Test form title 2",
+      "widgetButtonUrl": "https://www.somewhere.com/test-form-2/widget-bouton",
+      "widgetFullUrl": "https://www.somewhere.com/test-form-2/widget",
+      "widgetVignetteHorizontalUrl": "https://www.somewhere.com/test-form-2/widget-vignette-horizontale",
+      "widgetVignetteVerticalUrl": "https://www.somewhere.com/test-form-2/widget-vignette",
+      "formSlug": "test-form-2",
+      "formType": "Event",
+      "url": "https://www.somewhere.com/test-form-2",
+      "organizationSlug": "test-org"
+    }
+  ],
+  "pagination": {
+    "pageSize": 20,
+    "totalCount": 2,
+    "pageIndex": 1,
+    "totalPages": 1,
+    "continuationToken": "20220921075443587"
+  }
+}

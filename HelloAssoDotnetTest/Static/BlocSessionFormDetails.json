@@ -1,0 +1,40 @@
+{
+  "organizationLogo": "https://www.example.com/logo.png",
+  "organizationName": "Test Org",
+  "tiers": [
+    {
+      "id": 13744717,
+      "label": "Test tier label",
+      "description": "Test tier description",
+      "tierType": "Registration",
+      "price": 3250,
+      "vatRate": 0.00,
+      "paymentFrequency": "Single",
+      "maxPerUser": 2,
+      "isEligibleTaxReceipt": false
+    }
+  ],
+  "activityType": "Atelier",
+  "activityTypeId": 2,
+  "place": {
+    "name": "Test place",
+    "country": "FRA"
+  },
+  "personalizedMessage": "Test personalized message",
+  "currency": "EUR",
+  "description": "Test form description",
+  "meta": {
+    "createdAt": "2020-06-10T15:47:01.4915717+02:00",
+    "updatedAt": "2024-11-21T17:05:05.91+01:00"
+  },
+  "state": "Private",
+  "title": "Test form title",
+  "widgetButtonUrl": "https://www.somewhere.com/carte-bloc-session-2/widget-bouton",
+  "widgetFullUrl": "https://www.somewhere.com/carte-bloc-session-2/widget",
+  "widgetVignetteHorizontalUrl": "https://www.somewhere.com/carte-bloc-session-2/widget-vignette-horizontale",
+  "widgetVignetteVerticalUrl": "https://www.somewhere.com/carte-bloc-session-2/widget-vignette",
+  "formSlug": "carte-bloc-session-2",
+  "formType": "Event",
+  "url": "https://www.somewhere.com/carte-bloc-session-2",
+  "organizationSlug": "test-org"
+}
