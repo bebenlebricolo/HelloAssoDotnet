@@ -7,6 +7,14 @@
         "createdAt": "2024-10-21T13:59:37.727+02:00",
         "updatedAt": "2024-10-21T14:00:01.243+02:00"
       },
+      "banner": {
+        "fileName": "some banner file",
+        "publicUrl": "some banner url"
+      },
+      "logo": {
+        "fileName": "some file for the logo",
+        "publicUrl": "some full link for the logo"
+      },
       "state": "Private",
       "title": "Test form title 1",
       "widgetButtonUrl": "https://www.somewhere.com/test-form-1/widget-bouton",

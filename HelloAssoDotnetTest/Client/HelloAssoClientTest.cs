@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -617,6 +617,7 @@ public class Tests
         Assert.That(retrievedFormDetails.WidgetVignetteHorizontalUrl, Is.EqualTo("https://www.somewhere.com/carte-bloc-session-2/widget-vignette-horizontale"));
         Assert.That(retrievedFormDetails.WidgetVignetteVerticalUrl, Is.EqualTo("https://www.somewhere.com/carte-bloc-session-2/widget-vignette"));
         Assert.That(retrievedFormDetails.Url, Is.EqualTo("https://www.somewhere.com/carte-bloc-session-2"));
+
     }
 
     [Test]
@@ -702,6 +703,13 @@ public class Tests
         Assert.That(response.Data.Count, Is.EqualTo(2));
         Assert.That(response.Data[0].Title, Is.EqualTo("Test form title 1"));
         Assert.That(response.Data[1].Title, Is.EqualTo("Test form title 2"));
+
+        // Making sure logos and banners a properly read
+        Assert.That(response.Data[0].Logo!.FileName, Is.EqualTo("some file for the logo"));
+        Assert.That(response.Data[0].Logo!.PublicUrl, Is.EqualTo("some full link for the logo"));
+
+        Assert.That(response.Data[0].Banner!.FileName, Is.EqualTo("some banner file"));
+        Assert.That(response.Data[0].Banner!.PublicUrl, Is.EqualTo("some banner url"));
 
         Assert.That(response.Pagination.ContinuationToken, Is.EqualTo("20220921075443587"));
         Assert.That(response.Pagination.PageIndex, Is.EqualTo(1));
