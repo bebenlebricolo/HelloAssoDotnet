@@ -5,6 +5,8 @@
 
 This C# library (.net 10.0) provides a small client library that'll connect to HelloAsso api endpoints using an Api Key as its main authentication means.
 It is Dependency Injection ready and follows common .Net MVC patterns, and comes with its own Test harness.
+It's not meant to be fully exhaustive (and probably won't be by my sole action, I don't need to map 100% of the HelloAsso API for my needs).
+But it'll serve as a good base for anyone, assuming someone wants to take over and implement other endpoints mapping.
 
 For now, it mostly ships capabilities to :
 * Authenticate (create JWT token)
@@ -85,7 +87,7 @@ public class HelloAssoService : IHelloAssoService
 
 # Configuration
 This library requires a `ClientId` and a `ClientSecret` (as per retrieved on HelloAsso dashboard, using an admin account).
-Those can be provided using 2 methods : 
+Those can be provided using 2 methods :
 * Either use a secret file (for instance, a volume mapped to the container while running)
 * Environment variables.
 
