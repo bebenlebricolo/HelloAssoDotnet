@@ -24,6 +24,9 @@ The public data models are also published as a standalone package (`HelloAssoDot
 A complete, runnable example lives in [`samples/HelloAssoDotnet.Sample.Console`](samples/HelloAssoDotnet.Sample.Console/README.md).
 It shows how to wire the client through the .NET generic host, authenticate, and pull real data from your organization.
 
+# Endpoints
+See [`docs/Endpoints.md`](docs/Endpoints.md) for the list of HelloAsso API endpoints currently mapped by the client.
+
 > Note : for now, our JWT token solely provided by the API key alone <u>***doesn't have***</u> sufficient permissions to be able to download a Pdf Receipt from the payment's PaymentReceiptUrl.
 This might become available in the future when fine-grained rights can be implemented by HelloAsso infrastructure.
 But the client still exposes the calls, so that in the future this might be enabled more easily.
