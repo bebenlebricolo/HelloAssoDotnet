@@ -1,22 +1,8 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Base;
-using HelloAssoDotnet.Models.HelloAssoApi.Forms;
+using HelloAssoDotnet.Models.Api.Forms;
 
 namespace HelloAssoDotnet.Models.PublicApi;
 
 /// <summary>
+/// Paginated list of forms returned by the organization forms listing.
 /// </summary>
-public record ListOrganizationFormsResponse : IPaginatedResponse<FormLightModel>
-{
-    /// <summary>
-    /// List of retrieved forms
-    /// </summary>
-    public List<FormLightModel> Data { get; set; } =  new List<FormLightModel>();
-
-    /// <summary>
-    /// Pagination Properties
-    /// </summary>
-    public PaginationProperties Pagination { get; set; }  = new PaginationProperties();
-
-    /// <inheritdoc />
-    IReadOnlyList<FormLightModel> IPaginatedResponse<FormLightModel>.Data => Data;
-}
+public record ListOrganizationFormsResponse : PaginatedResponse<FormLightModel>;

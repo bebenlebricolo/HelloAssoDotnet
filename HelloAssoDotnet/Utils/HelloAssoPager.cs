@@ -5,7 +5,7 @@ namespace HelloAssoDotnet.Utils;
 
 /// <summary>
 /// Generic auto-pager for HelloAsso listing endpoints. It follows the <c>continuationToken</c> returned in
-/// <see cref="Models.HelloAssoApi.Base.PaginationProperties"/> until the API stops returning results.
+/// <see cref="Models.Api.Base.PaginationProperties"/> until the API stops returning results.
 /// This is a plain helper (no state, no HttpClient): sub-clients supply a page-fetching delegate.
 /// </summary>
 public static class HelloAssoPager
@@ -24,7 +24,7 @@ public static class HelloAssoPager
     public static async IAsyncEnumerable<T> PageAllAsync<TResponse, T>(
         Func<string?, CancellationToken, Task<Result<TResponse>>> fetchPage,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
-        where TResponse : class, IPaginatedResponse<T>
+        where TResponse : PaginatedResponse<T>
     {
         string? continuationToken = null;
         while (true)

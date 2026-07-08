@@ -1,5 +1,5 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Organizations;
+using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Organizations;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;

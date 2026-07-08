@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using HelloAssoDotnet.Client;
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
+using HelloAssoDotnet.Models.Api.Auth;
 using HelloAssoDotnet.Models.PublicApi;
 using HelloAssoDotnet.Services;
 using Microsoft.Extensions.Configuration;

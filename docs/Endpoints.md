@@ -36,8 +36,8 @@ token) and a `CancellationToken`. Listing methods that return an
 | `ListAsync` | GET | `/organizations/{orgSlug}/forms` | filters: `states`, `formTypes`, `pageIndex`, `pageSize`, `continuationToken` |
 | `ListAllAsync` | GET | `/organizations/{orgSlug}/forms` | auto-pager over the above |
 | `GetPublicDetailsAsync` | GET | `/organizations/{orgSlug}/forms/{formType}/{formSlug}/public` | public form data |
-| `GetTypesAsync` | GET | `/organizations/{orgSlug}/formtypes` | optional `states` filter |
-| `GetItemsAsync` | GET | `/organizations/{orgSlug}/forms/{formType}/{formSlug}/items` | item listing + filters |
+| `GetTypesAsync` | GET | `/organizations/{orgSlug}/formTypes` | optional `states` filter |
+| `GetItemsAsync` | GET | `/organizations/{orgSlug}/forms/{formType}/{formSlug}/items` | item listing + filters (`itemStates`, ...) |
 | `GetOrdersAsync` | GET | `/organizations/{orgSlug}/forms/{formType}/{formSlug}/orders` | order listing + filters |
 | `GetPaymentsAsync` | GET | `/organizations/{orgSlug}/forms/{formType}/{formSlug}/payments` | payment listing + filters |
 | `GetStatsAsync` | GET | `/organizations/{orgSlug}/forms/{formType}/{formSlug}/stats` | aggregated form statistics |
@@ -95,9 +95,9 @@ token) and a `CancellationToken`. Listing methods that return an
 | Client method | HTTP verb | Path / URL | Notes |
 | --- | --- | --- | --- |
 | `GetCompanyLegalStatusesAsync` | GET | `/values/company-legal-status` | |
-| `GetOrganizationCategoriesAsync` | GET | `/values/organization-categories` | |
+| `GetOrganizationCategoriesAsync` | GET | `/values/organization/categories` | |
 | `GetTagsAsync` | GET | `/values/tags` | |
-| `GetFormSubTypesAsync` | GET | `/values/forms/{formType}/types` | |
+| `GetFormSubTypesAsync` | GET | `/values/form/{formType}/types` | |
 
 ## CashOut - `client.CashOut`
 
@@ -109,7 +109,8 @@ token) and a `CancellationToken`. Listing methods that return an
 
 | Client method | HTTP verb | Path / URL | Notes |
 | --- | --- | --- | --- |
-| `Parse` | - | - | parses a raw webhook body into a typed notification |
+| `Parse` | - | - | parses a raw webhook body into an envelope (`eventType` + raw `data`) |
+| `ReadData` | - | - | explicit switch on `eventType` -> typed `NotificationPayload`; raw `data` kept as fallback |
 | `VerifyAuthenticityAsync` | GET | `/payments/{id}` or `/orders/{id}` | re-fetches the referenced resource to confirm authenticity |
 
 ## Notes

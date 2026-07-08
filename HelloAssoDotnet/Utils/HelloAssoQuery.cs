@@ -1,4 +1,4 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Forms;
+using HelloAssoDotnet.Models.Api.Forms;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Utils;
@@ -87,7 +87,7 @@ public static class HelloAssoQuery
         uint queriesCount = 0;
         foreach (var state in request.States)
         {
-            url = HelloAssoHttpExtensions.AddQueryToUrl(url, state.ToString(), "states", ref queriesCount);
+            url = HelloAssoHttpExtensions.AddQueryToUrl(url, state.ToString(), "itemStates", ref queriesCount);
         }
 
         url = AppendDateRangeAndPagination(url, request.From, request.To, request.PageIndex, request.PageSize, request.ContinuationToken, ref queriesCount);

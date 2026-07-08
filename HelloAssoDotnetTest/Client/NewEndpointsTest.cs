@@ -1,9 +1,9 @@
 using System.Net;
 using System.Text;
 using HelloAssoDotnet.Client;
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Forms;
-using HelloAssoDotnet.Models.HelloAssoApi.Payment;
+using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Forms;
+using HelloAssoDotnet.Models.Api.Payment;
 using HelloAssoDotnet.Models.PublicApi;
 using HelloAssoDotnet.Services;
 using Microsoft.Extensions.Configuration;
@@ -167,25 +167,29 @@ public class NewEndpointsTest
     [Test]
     public async Task Partners_GetMe_Ok()
     {
-        var client = BuildClient(@"{ ""name"" : ""My Partner"", ""privileges"" : [ ""AccessPublicData"" ] }", out var lastRequest);
+        var client = BuildClient(@"{ ""name"" : ""My Partner"", ""apiClient"" : { ""privileges"" : [ ""AccessPublicData"" ], ""domain"" : ""example.com"" } }", out var lastRequest);
 
         var result = await client.Partners.GetMeAsync(Tokens);
 
         Assert.That(result.IsOk, Is.True);
         Assert.That(result.Value!.Name, Is.EqualTo("My Partner"));
-        Assert.That(result.Value.Privileges, Does.Contain("AccessPublicData"));
+        Assert.That(result.Value.ApiClient!.Privileges, Does.Contain("AccessPublicData"));
+        Assert.That(result.Value.ApiClient.Domain, Is.EqualTo("example.com"));
         Assert.That(lastRequest()!.RequestUri!.ToString(), Does.EndWith("/partners/me"));
     }
 
     [Test]
     public async Task Forms_GetStats_Ok()
     {
-        var client = BuildClient(@"{ ""amountCollected"" : 12345, ""orderCount"" : 10, ""paymentCount"" : 12 }", out var lastRequest);
+        var client = BuildClient(@"{ ""totalParticipant"" : 42, ""unGroupedTiers"" : [ { ""id"" : 1, ""label"" : ""Standard"", ""entriesTaken"" : 10, ""price"" : 1500 } ], ""additionalOptions"" : [] }", out var lastRequest);
 
         var result = await client.Forms.GetStatsAsync(FormType.Event, "my-form", Tokens);
 
         Assert.That(result.IsOk, Is.True);
-        Assert.That(result.Value!.AmountCollected, Is.EqualTo(12345));
+        Assert.That(result.Value!.TotalParticipant, Is.EqualTo(42));
+        Assert.That(result.Value.UnGroupedTiers, Has.Count.EqualTo(1));
+        Assert.That(result.Value.UnGroupedTiers[0].Label, Is.EqualTo("Standard"));
+        Assert.That(result.Value.UnGroupedTiers[0].Price, Is.EqualTo(1500));
         Assert.That(lastRequest()!.RequestUri!.ToString(), Does.EndWith("/organizations/test-org-slug/forms/Event/my-form/stats"));
     }
 

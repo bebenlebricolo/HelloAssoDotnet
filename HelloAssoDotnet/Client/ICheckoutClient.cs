@@ -1,5 +1,5 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Checkout;
+using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Checkout;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;

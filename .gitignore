@@ -11,6 +11,7 @@ riderModule.iml
 **.autosave*
 .pytest_cache
 .secrets
+.cache
 .runsettings
 **/TestResults**
 

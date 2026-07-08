@@ -1,5 +1,5 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Notifications;
+using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Notifications;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;
@@ -15,6 +15,16 @@ public interface INotificationsClient
     /// <param name="rawBody">Raw JSON body received on the webhook endpoint.</param>
     /// <returns>The parsed notification, or a client error if the body could not be parsed.</returns>
     Result<HelloAssoNotification> Parse(string rawBody);
+
+    /// <summary>
+    /// Projects a parsed notification into a strongly-typed payload, chosen explicitly from
+    /// <see cref="HelloAssoNotification.EventType"/>. Returns <c>null</c> for unknown event types or when the
+    /// raw <see cref="HelloAssoNotification.Data"/> does not match the known model - in which case the caller
+    /// can still read <see cref="HelloAssoNotification.Data"/> by hand.
+    /// </summary>
+    /// <param name="notification">The parsed notification whose <c>Data</c> should be typed.</param>
+    /// <returns>The typed payload, or <c>null</c> when it cannot be produced.</returns>
+    NotificationPayload? ReadData(HelloAssoNotification notification);
 
     /// <summary>
     /// Verifies the authenticity of a notification.

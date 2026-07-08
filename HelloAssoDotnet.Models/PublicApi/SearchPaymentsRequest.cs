@@ -1,4 +1,4 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Payment;
+using HelloAssoDotnet.Models.Api.Payment;
 
 namespace HelloAssoDotnet.Models.PublicApi;
 

@@ -1,6 +1,6 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Forms;
-using HelloAssoDotnet.Models.HelloAssoApi.Values;
+using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Forms;
+using HelloAssoDotnet.Models.Api.Values;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;

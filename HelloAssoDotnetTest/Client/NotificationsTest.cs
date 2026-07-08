@@ -2,8 +2,8 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using HelloAssoDotnet.Client;
-using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Notifications;
+using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Notifications;
 using HelloAssoDotnet.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -86,6 +86,52 @@ public class NotificationsTest
         var result = client.Notifications.Parse("this is not json");
 
         Assert.That(result.IsOk, Is.False);
+    }
+
+    [Test]
+    public void ReadData_PaymentNotification_TypedPayload()
+    {
+        var client = BuildClientReturning(HttpStatusCode.OK);
+        var body = @"{ ""eventType"" : ""Payment"", ""data"" : { ""id"" : 42, ""amount"" : 8000, ""order"" : { ""id"" : 7 }, ""payer"" : { } } }";
+        var parsed = client.Notifications.Parse(body);
+
+        var payload = client.Notifications.ReadData(parsed.Value!);
+
+        Assert.That(payload, Is.InstanceOf<PaymentNotificationPayload>());
+        var payment = ((PaymentNotificationPayload)payload!).Payment;
+        Assert.That(payment.Id, Is.EqualTo(42));
+        Assert.That(payment.Amount, Is.EqualTo(8000));
+        Assert.That(payment.Order.Id, Is.EqualTo(7));
+    }
+
+    [Test]
+    public void ReadData_OrderNotification_TypedPayload()
+    {
+        var client = BuildClientReturning(HttpStatusCode.OK);
+        var body = @"{ ""eventType"" : ""Order"", ""data"" : { ""id"" : 7, ""formType"" : ""Event"", ""formSlug"" : ""my-form"" } }";
+        var parsed = client.Notifications.Parse(body);
+
+        var payload = client.Notifications.ReadData(parsed.Value!);
+
+        Assert.That(payload, Is.InstanceOf<OrderNotificationPayload>());
+        var order = ((OrderNotificationPayload)payload!).Order;
+        Assert.That(order.Id, Is.EqualTo(7));
+        Assert.That(order.FormSlug, Is.EqualTo("my-form"));
+    }
+
+    [Test]
+    public void ReadData_UnknownEventType_ReturnsNull_RawDataPreserved()
+    {
+        var client = BuildClientReturning(HttpStatusCode.OK);
+        var body = @"{ ""eventType"" : ""SomethingBrandNew"", ""data"" : { ""id"" : 99 } }";
+        var parsed = client.Notifications.Parse(body);
+
+        var payload = client.Notifications.ReadData(parsed.Value!);
+
+        Assert.That(payload, Is.Null);
+        // The raw payload must remain readable as an escape hatch.
+        Assert.That(parsed.Value!.EventType, Is.EqualTo(NotificationEventType.Unknown));
+        Assert.That(parsed.Value.Data.GetProperty("id").GetInt32(), Is.EqualTo(99));
     }
 
     [Test]
