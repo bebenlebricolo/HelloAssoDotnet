@@ -5,7 +5,7 @@ namespace HelloAssoDotnet.Models.PublicApi;
 
 /// <summary>
 /// </summary>
-public record ListOrganizationFormsResponse
+public record ListOrganizationFormsResponse : IPaginatedResponse<FormLightModel>
 {
     /// <summary>
     /// List of retrieved forms
@@ -16,4 +16,7 @@ public record ListOrganizationFormsResponse
     /// Pagination Properties
     /// </summary>
     public PaginationProperties Pagination { get; set; }  = new PaginationProperties();
+
+    /// <inheritdoc />
+    IReadOnlyList<FormLightModel> IPaginatedResponse<FormLightModel>.Data => Data;
 }

@@ -25,6 +25,12 @@ public record AppsettingsConfiguration
     public string OrganizationSlug { get; set; } = "";
 
     /// <summary>
+    /// Selects the HelloAsso backend (Production or Sandbox).
+    /// Defaults to <see cref="HelloAssoEnvironment.Production"/> when the key is missing or unparseable.
+    /// </summary>
+    public HelloAssoEnvironment Environment { get; set; } = HelloAssoEnvironment.Production;
+
+    /// <summary>
     /// Instance of the configuration
     /// </summary>
     /// <param name="section"></param>
@@ -41,6 +47,13 @@ public record AppsettingsConfiguration
         SecretsFile = secretsFile ?? SecretsFile;
         OrganizationSlug = organizationSlug ?? OrganizationSlug;
         SecretsFile = EnvVarResolver.SusbtituteEnvInString(SecretsFile);
+
+        // Environment is optional and defaults to Production. An unknown value is ignored (kept as-is).
+        var environment = section.GetValue<string?>(nameof(Environment));
+        if (!string.IsNullOrWhiteSpace(environment) && Enum.TryParse<HelloAssoEnvironment>(environment, ignoreCase: true, out var parsedEnvironment))
+        {
+            Environment = parsedEnvironment;
+        }
 
         return success;
     }

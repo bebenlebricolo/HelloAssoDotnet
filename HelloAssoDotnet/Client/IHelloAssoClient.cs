@@ -1,93 +1,95 @@
 using HelloAssoDotnet.Models.Configuration;
 using HelloAssoDotnet.Models.HelloAssoApi.Auth;
-using HelloAssoDotnet.Models.HelloAssoApi.Forms;
-using HelloAssoDotnet.Models.HelloAssoApi.Order;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;
 
 /// <summary>
-/// Defines the operations for interacting with the HelloAsso system.
-/// Provides methods for authentication, retrieving forms, payments, orders, and related details.
+/// Root entry point for the HelloAsso API. It owns authentication and the cached access token, and exposes
+/// the API surface grouped into resource sub-clients (e.g. <c>client.Orders.GetAsync(...)</c>).
+/// Sub-client methods use the cached token automatically; pass an explicit <see cref="AuthTokens"/> to any
+/// of them to manage tokens yourself.
 /// </summary>
 public interface IHelloAssoClient
 {
     /// <summary>
-    /// Authenticate webserver application.
-    /// Tokens are cached and retrieved from there if we can, otherwise token is renewed and stored again.
+    /// Authenticate the webserver application (client_credentials grant).
+    /// On success, the returned tokens are cached and reused by the sub-clients until they near expiry.
     /// </summary>
-    public Task<Result<AuthTokens>> AuthenticateAsync();
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The fresh authentication tokens.</returns>
+    Task<Result<AuthTokens>> AuthenticateAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Refreshes the given Jwt token
+    /// Refreshes the given Jwt token (refresh_token grant). On success the cache is updated.
     /// </summary>
-    /// <param name="tokens"></param>
-    /// <returns></returns>
-    public Task<Result<AuthTokens>> RefreshTokenAsync(AuthTokens tokens);
+    /// <param name="tokens">Tokens carrying the refresh token to use.</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The refreshed authentication tokens.</returns>
+    Task<Result<AuthTokens>> RefreshTokenAsync(AuthTokens tokens, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves all payments for a given user.
-    /// Returns null, if none can be found.
+    /// Sets the client configuration (used by calling layers, e.g. the user agent).
     /// </summary>
-    /// <param name="email">user email (used as a search parameter)</param>
-    /// <param name="tokens">Authentication tokens that'll be used for this request</param>
-    /// <returns></returns>
-    public Task<Result<SearchPaymentResponse>> GetPaymentForUserAsync(string email, AuthTokens tokens);
+    ClientConfig Config { get; set; }
 
     /// <summary>
-    /// Retrieves a list of all forms for an association using provided request model.
+    /// Operations scoped to the configured organization.
     /// </summary>
-    /// <param name="requestModel">Request model for this HelloAsso api</param>
-    /// <param name="tokens"></param>
-    /// <returns></returns>
-    public Task<Result<ListOrganizationFormsResponse>> GetFormsFromOrganization(ListOrganizationFormsRequest requestModel, AuthTokens tokens);
+    IOrganizationsClient Organizations { get; }
 
     /// <summary>
-    /// Retrieves a single form details.
+    /// Operations over the forms (campaigns) of the configured organization.
     /// </summary>
-    /// <param name="formSlug">exact form slug</param>
-    /// <param name="formType">Required form type</param>
-    /// <param name="tokens">Authentication token for HelloAsso Apis</param>
-    /// <returns></returns>
-    public Task<Result<FormDetails>> GetFormDetailsAsync(string formSlug, FormType formType, AuthTokens tokens);
+    IFormsClient Forms { get; }
 
     /// <summary>
-    /// Retrieves a single Payment for a user, given the paymentId.
+    /// Operations over orders.
     /// </summary>
-    /// <param name="paymentId">Payment id</param>
-    /// <param name="tokens">Authentication tokens used with this request</param>
-    /// <param name="withFailedRefundOperations">Will also retrieve failed payments</param>
-    /// <returns>Payment response, if an item was found; null otherwise</returns>
-    public Task<Result<PaymentResponse>> GetPaymentDetailsAsync(int paymentId, AuthTokens tokens, bool withFailedRefundOperations = false);
+    IOrdersClient Orders { get; }
 
     /// <summary>
-    /// Retrieves the Receipt's PDF.
-    /// Note that this only works when tokens have the full roles assigned (conventional Jwt tokens retrieved from API key DO NOT WORK!)
+    /// Operations over items (individual entries sold within orders).
     /// </summary>
-    /// <param name="payment">Sample payment data (as per retrieved with <see cref="GetPaymentDetailsAsync"/> or <see cref="GetPaymentForUserAsync"/></param>
-    /// <param name="tokens"></param>
-    /// <returns></returns>
-    public Task<Result<Stream>> GetPaymentReceiptPdfAsync(PaymentResponse payment, AuthTokens tokens);
-
+    IItemsClient Items { get; }
 
     /// <summary>
-    /// Retrieves the Event ticket's PDF(s) from a payment response (that refers to an event booking ticket)
+    /// Operations over payments.
     /// </summary>
-    /// <param name="payment">Sample payment data (as per retrieved with <see cref="GetPaymentDetailsAsync"/> or <see cref="GetPaymentForUserAsync"/></param>
-    /// <param name="tokens"></param>
-    /// <returns></returns>
-    public Task<Result<List<Stream>>> GetEventTicketPdf(PaymentResponse payment, AuthTokens tokens);
+    IPaymentsClient Payments { get; }
 
     /// <summary>
-    ///
+    /// Read-only operations over HelloAsso Checkout.
     /// </summary>
-    /// <param name="orderId"></param>
-    /// <param name="tokens"></param>
-    /// <returns></returns>
-    public Task<Result<OrderDetails>> GetOrderDetailsAsync(int orderId, AuthTokens tokens);
+    ICheckoutClient Checkout { get; }
 
     /// <summary>
-    /// Sets the client configuration (used by calling layers)
+    /// Public directory searches.
     /// </summary>
-    public ClientConfig Config { get; set; }
+    IDirectoryClient Directory { get; }
+
+    /// <summary>
+    /// Operations about the calling partner.
+    /// </summary>
+    IPartnersClient Partners { get; }
+
+    /// <summary>
+    /// Operations about the currently authenticated user.
+    /// </summary>
+    IUsersClient Users { get; }
+
+    /// <summary>
+    /// Reference data ("values").
+    /// </summary>
+    IValuesClient Values { get; }
+
+    /// <summary>
+    /// Operations over cash-outs.
+    /// </summary>
+    ICashOutClient CashOut { get; }
+
+    /// <summary>
+    /// Helpers to consume HelloAsso notifications (webhooks).
+    /// </summary>
+    INotificationsClient Notifications { get; }
 }

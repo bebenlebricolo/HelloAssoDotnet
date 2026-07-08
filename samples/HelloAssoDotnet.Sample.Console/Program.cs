@@ -1,8 +1,7 @@
 using HelloAssoDotnet.Client;
+using HelloAssoDotnet.Extensions;
 using HelloAssoDotnet.Models.Configuration;
 using HelloAssoDotnet.Models.PublicApi;
-using HelloAssoDotnet.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,27 +16,21 @@ using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Read the appsettings-bound configuration (SecretsFile + OrganizationSlug).
+// Read the appsettings-bound configuration (SecretsFile + OrganizationSlug + Environment).
 var helloAssoConfig = new AppsettingsConfiguration();
 helloAssoConfig.FromConfig(builder.Configuration);
 
-// The secrets service resolves the ClientId / ClientSecret. It reads the secrets
-// file when present, and otherwise falls back to environment variables.
-builder.Services.AddSingleton<IHelloAssoSecretsService>(new DefaultHelloAssoSecretsService
-{
-    SecretsFilePath = helloAssoConfig.SecretsFile,
-});
-
-// Register the client as a typed HttpClient. The remaining constructor
-// dependencies (secrets service, logger, configuration) are resolved from DI.
-builder.Services.AddHttpClient<IHelloAssoClient, HelloAssoClient>();
+// Register the default secrets service (secrets file, then env-var fallback) and the client as a typed
+// HttpClient in a single call. The logger and configuration are resolved from DI.
+builder.Services.AddHelloAsso(helloAssoConfig.SecretsFile);
 
 using var host = builder.Build();
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
 var client = host.Services.GetRequiredService<IHelloAssoClient>();
 
-// 1. Authenticate (creates the JWT tokens from the ClientId / ClientSecret).
+// 1. Authenticate (creates and caches the JWT tokens from the ClientId / ClientSecret).
+//    Once authenticated, sub-client calls reuse the cached token automatically (no need to pass it around).
 var authResult = await client.AuthenticateAsync();
 if (!authResult.IsOk)
 {
@@ -48,8 +41,8 @@ if (!authResult.IsOk)
 var tokens = authResult.Value!;
 logger.LogInformation("Authenticated successfully (token expires in {expiresIn}s).", tokens.ExpiresIn);
 
-// 2. List the organization forms.
-var formsResult = await client.GetFormsFromOrganization(new ListOrganizationFormsRequest(), tokens);
+// 2. List the organization forms (the cached token is used under the hood).
+var formsResult = await client.Forms.ListAsync(new ListOrganizationFormsRequest());
 if (!formsResult.IsOk)
 {
     logger.LogError("Failed to list organization forms: {error}", formsResult.Error);
@@ -67,7 +60,7 @@ foreach (var form in forms.Data)
 var email = args.FirstOrDefault();
 if (!string.IsNullOrWhiteSpace(email))
 {
-    var paymentsResult = await client.GetPaymentForUserAsync(email, tokens);
+    var paymentsResult = await client.Payments.SearchForUserAsync(email);
     if (!paymentsResult.IsOk)
     {
         logger.LogError("Failed to get payments for '{email}': {error}", email, paymentsResult.Error);

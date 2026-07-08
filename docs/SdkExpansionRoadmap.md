@@ -6,11 +6,11 @@ Durable roadmap for growing [`HelloAssoClient`](../HelloAssoDotnet/Client/HelloA
 
 | Phase | Scope | State |
 | --- | --- | --- |
-| Phase 0 | Foundation (static helpers, root token cache, sandbox, pager, CancellationToken) | Not started |
-| Phase 0 | Refactor to resource sub-clients + `AddHelloAsso` DI extension | Not started |
-| Phase 1 | Read-only endpoints + models + tests | Not started |
-| Phase 1 | Docs: sample, README, `docs/Endpoints.md` | Not started |
-| Phase 2 | Webhooks / notifications | Not started |
+| Phase 0 | Foundation (static helpers, root token cache, sandbox, pager, CancellationToken) | Done (v2.0.0) |
+| Phase 0 | Refactor to resource sub-clients + `AddHelloAsso` DI extension | Done (v2.0.0) |
+| Phase 1 | Read-only endpoints + models + tests | Done (v2.0.0) |
+| Phase 1 | Docs: sample, README, `docs/Endpoints.md` | Done (v2.0.0) |
+| Phase 2 | Webhooks / notifications | Done (v2.0.0) |
 | Phase 3 | Write-capable endpoints | Deferred (future) |
 
 ## Guiding principles

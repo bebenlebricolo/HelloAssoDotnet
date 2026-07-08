@@ -190,7 +190,7 @@ public class Tests
 
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
-        var result = await client.GetPaymentForUserAsync("test email", new AuthTokens());
+        var result = await client.Payments.SearchForUserAsync("test email", GenerateFakeTokens());
         var payments = result.Value;
         Assert.That(result.IsOk, Is.True);
 
@@ -217,7 +217,7 @@ public class Tests
 
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
-        var result = await client.GetPaymentForUserAsync("test email", new AuthTokens());
+        var result = await client.Payments.SearchForUserAsync("test email", GenerateFakeTokens());
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.NotFound));
 
@@ -276,7 +276,7 @@ public class Tests
         var fakePayment = GenerateFakePaymentResponse();
         var fakeTokens = GenerateFakeTokens();
 
-        var result = await client.GetPaymentReceiptPdfAsync(fakePayment, fakeTokens);
+        var result = await client.Payments.GetReceiptPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.True);
         Assert.That(result.Value, Is.EqualTo(fakeStream));
     }
@@ -298,7 +298,7 @@ public class Tests
         var fakePayment = GenerateFakePaymentResponse();
         var fakeTokens = GenerateFakeTokens();
 
-        var result = await client.GetPaymentReceiptPdfAsync(fakePayment, fakeTokens);
+        var result = await client.Payments.GetReceiptPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.Unauthenticated));
     }
@@ -319,7 +319,7 @@ public class Tests
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
         var fakePayment = GenerateFakePaymentResponse();
         var fakeTokens = GenerateFakeTokens();
-        var result = await client.GetPaymentReceiptPdfAsync(fakePayment, fakeTokens);
+        var result = await client.Payments.GetReceiptPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.NotFound));
     }
@@ -376,7 +376,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetEventTicketPdf(fakePayment, fakeTokens);
+        var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.True);
         Assert.That(result.Value!.Count, Is.EqualTo(1));
         Assert.That(result.Value[0], Is.EqualTo(fakeStream));
@@ -431,7 +431,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetEventTicketPdf(fakePayment, fakeTokens);
+        var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.True);
         Assert.That(result.Value!.Count, Is.EqualTo(2));
 
@@ -457,7 +457,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetEventTicketPdf(fakePayment, fakeTokens);
+        var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.Unauthenticated));
     }
@@ -479,7 +479,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetEventTicketPdf(fakePayment, fakeTokens);
+        var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.NotFound));
     }
@@ -544,7 +544,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetEventTicketPdf(fakePayment, fakeTokens);
+        var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.ServerError));
     }
@@ -580,7 +580,7 @@ public class Tests
 
         var formSlug = "carte-bloc-session-2";
         var formType = FormType.Event;
-        var result = await client.GetFormDetailsAsync(formSlug, formType, fakeTokens);
+        var result = await client.Forms.GetPublicDetailsAsync(formSlug, formType, fakeTokens);
         Assert.That(result.IsOk, Is.True);
 
         var retrievedFormDetails = result.Value!;
@@ -640,7 +640,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetFormDetailsAsync("test-slug", FormType.Event, fakeTokens);
+        var result = await client.Forms.GetPublicDetailsAsync("test-slug", FormType.Event, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.Unauthenticated));
     }
@@ -665,7 +665,7 @@ public class Tests
         var httpClient = new HttpClient(mockHttpMessageHandler.Object);
         var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
 
-        var result = await client.GetFormDetailsAsync("test-slug", FormType.Event, fakeTokens);
+        var result = await client.Forms.GetPublicDetailsAsync("test-slug", FormType.Event, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.NotFound));
     }
@@ -695,7 +695,7 @@ public class Tests
 
         var request = new ListOrganizationFormsRequest();
 
-        var result = await client.GetFormsFromOrganization(request, fakeTokens);
+        var result = await client.Forms.ListAsync(request, fakeTokens);
         Assert.That(result.IsOk, Is.True);
         var response = result.Value!;
 
@@ -740,7 +740,7 @@ public class Tests
 
         var request = new ListOrganizationFormsRequest();
 
-        var result = await client.GetFormsFromOrganization(request, fakeTokens);
+        var result = await client.Forms.ListAsync(request, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.NotFound));
     }
@@ -767,7 +767,7 @@ public class Tests
 
         var request = new ListOrganizationFormsRequest();
 
-        var result = await client.GetFormsFromOrganization(request, fakeTokens);
+        var result = await client.Forms.ListAsync(request, fakeTokens);
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.Unauthenticated));
     }

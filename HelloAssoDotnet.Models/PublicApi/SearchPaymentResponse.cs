@@ -5,7 +5,7 @@ namespace HelloAssoDotnet.Models.PublicApi;
 /// <summary>
 /// Search payment response from <see aref="https://dev.helloasso.com/reference/get_organizations-organizationslug-payments"/>
 /// </summary>
-public record SearchPaymentResponse
+public record SearchPaymentResponse : IPaginatedResponse<PaymentResponse>
 {
     /// <summary>
     /// Actual data list
@@ -16,4 +16,7 @@ public record SearchPaymentResponse
     /// Pagination properties retrieved from listing endpoints
     /// </summary>
     public PaginationProperties Pagination { get; set; } = new PaginationProperties();
+
+    /// <inheritdoc />
+    IReadOnlyList<PaymentResponse> IPaginatedResponse<PaymentResponse>.Data => Data;
 }
