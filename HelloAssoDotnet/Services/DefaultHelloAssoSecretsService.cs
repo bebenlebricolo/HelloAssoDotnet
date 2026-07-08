@@ -20,10 +20,10 @@ public class DefaultHelloAssoSecretsService : IHelloAssoSecretsService
     /// </summary>
     /// <param name="secretsFilePath"></param>
     /// <returns></returns>
-    public static HelloAssoSecretsFileModel? ReadFromFile(string secretsFilePath)
+    public static SecretsFileModel? ReadFromFile(string secretsFilePath)
     {
         using FileStream fileStream = new(secretsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var model = JsonSerializer.Deserialize<HelloAssoSecretsFileModel>(fileStream, JsonOptionsProvider.GetJsonOptions());
+        var model = JsonSerializer.Deserialize<SecretsFileModel>(fileStream, JsonOptionsProvider.GetJsonOptions());
         return model;
     }
 

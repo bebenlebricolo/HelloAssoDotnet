@@ -100,12 +100,13 @@ public record AppsettingsConfiguration
     /// <returns>OAuth2 token endpoint</returns>
     public static string DefaultOauthTokenUrl(HelloAssoEnvironment environment)
     {
+        var baseUrl = DefaultApiBaseUrl(environment);
         switch (environment)
         {
             case HelloAssoEnvironment.Sandbox:
-                return "https://api.helloasso-sandbox.com/oauth2/token";
+                return $"{baseUrl}/oauth2/token";
             default:
-                return "https://api.helloasso.com/oauth2/token";
+                return $"{baseUrl}/oauth2/token";
         }
     }
 
