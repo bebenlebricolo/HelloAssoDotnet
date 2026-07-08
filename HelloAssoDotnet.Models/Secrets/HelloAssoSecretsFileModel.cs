@@ -3,7 +3,7 @@ namespace HelloAssoDotnet.Models.Secrets;
 /// <summary>
 /// Represents a very simple secrets json file model.
 /// </summary>
-public record HelloAssoSecretsFileModel
+public record SecretsFileModel
 {
     /// <summary>
     /// Client id

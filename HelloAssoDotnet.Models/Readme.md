@@ -2,7 +2,7 @@
 This package provides the **public** models the HelloAssoDotnet NuGet package uses.
 It ships the following namespaces: 
 * Configuration : used to configure the library. Usually used through `appsettings.json` files
-* HelloAssoApi : models pulled from HelloAsso REST API. Those models percolate through this library, in order to limit models rewriting and code duplication.
+* Api : models pulled from HelloAsso REST API. Those models percolate through this library, in order to limit models rewriting and code duplication.
 * PublicApi : data models used by HelloAssoDotnet library to provide it's results
 * Secrets : file formats that this library uses in order to properly communicate with HelloAsso Rest API services.
 * Utils : some utilities and tools mainly used to properly read `Configuration` objects

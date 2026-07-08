@@ -1,4 +1,4 @@
-using HelloAssoDotnet.Models.HelloAssoApi.Forms;
+using HelloAssoDotnet.Models.Api.Forms;
 
 namespace HelloAssoDotnet.Models.PublicApi;
 

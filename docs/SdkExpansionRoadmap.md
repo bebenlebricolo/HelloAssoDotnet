@@ -6,11 +6,15 @@ Durable roadmap for growing [`HelloAssoClient`](../HelloAssoDotnet/Client/HelloA
 
 | Phase | Scope | State |
 | --- | --- | --- |
-| Phase 0 | Foundation (static helpers, root token cache, sandbox, pager, CancellationToken) | Not started |
-| Phase 0 | Refactor to resource sub-clients + `AddHelloAsso` DI extension | Not started |
-| Phase 1 | Read-only endpoints + models + tests | Not started |
-| Phase 1 | Docs: sample, README, `docs/Endpoints.md` | Not started |
-| Phase 2 | Webhooks / notifications | Not started |
+| Phase 0 | Foundation (static helpers, root token cache, sandbox, pager, CancellationToken) | Done (v2.0.0) |
+| Phase 0 | Refactor to resource sub-clients + `AddHelloAsso` DI extension | Done (v2.0.0) |
+| Phase 1 | Read-only endpoints + models + tests | Done (v2.0.0) |
+| Phase 1 | Docs: sample, README, `docs/Endpoints.md` | Done (v2.0.0) |
+| Phase 1.5 | Spec reconciliation (paths, query params, model fidelity vs `helloasso.json`) | Done (v2.0.0) |
+| Phase 2 | Webhooks / notifications (explicit polymorphic `ReadData`) | Done (v2.0.0) |
+| Phase 2 | Wiring rework: extract `HelloAssoConnection`, token-cache concurrency | Done (v2.0.0) |
+| Phase 2.5 | Structural refactor: pagination base record + namespace/folder tidy | Done (v2.0.0) |
+| Phase 2.6 | PR review round 2: full DI, config-driven URLs, drop pagination aliases, throttling | Done (v2.0.0) |
 | Phase 3 | Write-capable endpoints | Deferred (future) |
 
 ## Guiding principles
@@ -95,6 +99,51 @@ Grouped into sub-clients. All GET unless noted.
 - `INotificationsClient.Parse(rawBody)` -> discriminated `HelloAssoNotification` by `eventType` (Payment, Order, Form, Organization events per the notification examples in the docs).
 - `VerifyAuthenticityAsync(...)` implementing the mechanism from [Vérifier l'authenticité](https://dev.helloasso.com/docs/secure-webhook.md) - confirm during impl whether it is a signature header or a re-fetch-by-id check before finalizing.
 - Notification payload models mirroring the documented examples; tests parse each documented example.
+
+## Phase 1.5 - Spec reconciliation (done, v2.0.0)
+
+Reconciled the implementation against the validated OpenAPI spec [`helloasso.json`](https://github.com/HelloAsso/helloasso-open-api). Fixes:
+
+- Paths: `formtypes` -> `formTypes`; `values/organization-categories` -> `values/organization/categories`; `values/forms/{type}/types` -> `values/form/{type}/types`.
+- Query params: item listing now sends `itemStates` (was `states`).
+- Model fidelity (mapped field-by-field to the real schemas):
+  - `OrganizationDetails` -> `OrganizationPublicModel` (gallery/videos, geolocation, fiscal-receipt flags, `role`, `updateDate`, `logo` as string, etc.).
+  - `OrganizationLightModel` -> spec `OrganizationLightModel` (`logo`, `role`, `description`, `updateDate`, `categoryJoId`).
+  - `FormStats` -> `FormStatsModel` (`totalParticipant`, `unGroupedTiers`, `additionalOptions`) + `TierStats`.
+  - `CheckoutIntentResponse`: `Id` -> `int`; `Metadata` -> raw `JsonElement?` (integrator-defined JSON).
+  - `PartnerInfo` -> `PartnerPublicModel` + `ApiClientModel` + `ApiUrlNotificationModel` + `PartnerStatisticsModel`.
+  - Values: `CompanyLegalStatus {id,label}`, `OrganizationCategory {id,label,shortLabel}`, `PublicTag {name,score}`, `FormSubType {id,label,shortLabel}`.
+  - `PaymentState` extended to the full spec enum set.
+  - Added `GlobalRole`, `ImageModel`, `VideoModel`; reused existing `Geolocation`.
+
+## Phase 2 - Webhooks / notifications (done, v2.0.0)
+
+- `INotificationsClient.Parse(rawBody)` -> `HelloAssoNotification` envelope (`EventType` + raw `Data` + `Metadata`).
+- `INotificationsClient.ReadData(notification)` -> explicit `switch` on `EventType` that deserializes the raw `Data` into a known model (`PaymentNotificationPayload`/`OrderNotificationPayload`/`FormNotificationPayload`/`OrganizationNotificationPayload`). The webhook body is polymorphic and absent from the OpenAPI spec, so payload models are hand-written from documented examples. Deliberately no `[JsonPolymorphic]`/reflection: the mapping is fully explicit and the raw `JsonElement` remains a fallback for unknown/new event types.
+- `VerifyAuthenticityAsync(...)` re-fetches the referenced resource by id (heuristic; HelloAsso does not sign payloads).
+
+## Phase 2 - Wiring rework (done, v2.0.0)
+
+- Extracted [`HelloAssoConnection`](../HelloAssoDotnet/Client/HelloAssoConnection.cs): a concrete `IHelloAssoClientContext` owning the `HttpClient`, config, resolved URIs, logger and the token cache. It is constructed before the sub-clients, so the facade no longer leaks a partially-constructed `this`.
+- Token acquisition is guarded by a `SemaphoreSlim` with a double-checked cache read, so concurrent sub-client calls authenticate/refresh once.
+
+## Phase 2.5 - Structural refactor (done, v2.0.0)
+
+Separated from correctness work so the churn landed in its own reviewable step. Both are breaking (fine pre-release on the v2.0.0 line).
+
+- Replaced the `IPaginatedResponse<T>` interface with a shared base [`PaginatedResponse<T>`](../HelloAssoDotnet.Models/PublicApi/PaginatedResponse.cs) `record`; the listing responses now derive from it and `HelloAssoPager` is constrained to it.
+- Collapsed the interface/impl folder split (sub-clients moved from `Client/SubClients/` into `Client/`, namespace `HelloAssoDotnet.Client`) and renamed `HelloAssoDotnet.Models.HelloAssoApi.*` -> `HelloAssoDotnet.Models.Api.*`.
+
+## Phase 2.6 - PR review round 2 (done, v2.0.0)
+
+Follow-up on the second batch of PR comments (breaking, fine pre-release on the v2.0.0 line).
+
+- Config-driven URLs: the production/sandbox base + OAuth URLs now live on [`AppsettingsConfiguration`](../HelloAssoDotnet.Models/Configuration/AppsettingsConfiguration.cs) (`ApiBaseUrl`/`OauthTokenUrl`), defaulting to the environment's URLs (resolved via classic `switch`/`case`) and overridable from configuration. Removed `HelloAssoEnvironmentUris`.
+- Full DI: [`HelloAssoConnection`](../HelloAssoDotnet/Client/HelloAssoConnection.cs) is now `public`, backed by a named `IHttpClientFactory` client, and every collaborator (connection + sub-clients + facade) is registered and injected by [`AddHelloAsso`](../HelloAssoDotnet/Extensions/HelloAssoServiceCollectionExtensions.cs). [`HelloAssoClient`](../HelloAssoDotnet/Client/HelloAssoClient.cs) no longer news anything in its constructor. Tests build the graph through a shared `TestClientFactory`.
+- Pagination: `PaginatedResponse<T>` is now a concrete record used directly at the call sites; the empty alias records (`ListOrdersResponse`, `SearchPaymentResponse`, ...) were dropped.
+- Notifications: added an inline comment explaining the hand-written polymorphic parsing and converted the switch expressions to classic `switch`/`case`.
+- Throttling: `OrdersClient.GetEventTicketsPdfAsync` now downloads tickets with a bounded degree of parallelism (`SemaphoreSlim`).
+- Misc: renamed the `MechanismsTest` suite to `HelpersTest`, made new model default values explicit, and fixed a non-versioned spec link.
 
 ## Phase 3 - Write-capable endpoints (future, do later)
 

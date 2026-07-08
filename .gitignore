@@ -3,6 +3,8 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+*.DotSettings.user
+
 .idea
 .vscode
 .vs
@@ -11,6 +13,7 @@ riderModule.iml
 **.autosave*
 .pytest_cache
 .secrets
+.cache
 .runsettings
 **/TestResults**
 
