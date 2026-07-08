@@ -5,17 +5,16 @@ using HelloAssoDotnet.Models.Api.Auth;
 using HelloAssoDotnet.Models.PublicApi;
 using HelloAssoDotnet.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
 
 namespace HelloAssoDotnetTest.Client;
 
 /// <summary>
-/// Tests covering the Phase 0 cross-cutting mechanisms: token caching + auto-refresh, the pagination
-/// auto-pager and the production/sandbox environment switch.
+/// Tests covering the cross-cutting helpers: token caching + auto-refresh, the pagination auto-pager and the
+/// production/sandbox environment switch.
 /// </summary>
-public class MechanismsTest
+public class HelpersTest
 {
     private static IConfiguration GetConfiguration(string environment = "Production")
     {
@@ -51,12 +50,10 @@ public class MechanismsTest
 
     private static bool IsOauth(HttpRequestMessage request) => request.RequestUri!.ToString().Contains("oauth2/token");
 
-    private static HelloAssoClient BuildClient(HttpMessageHandler handler, IConfiguration configuration)
+    private static IHelloAssoClient BuildClient(HttpMessageHandler handler, IConfiguration configuration)
     {
-        var logger = new Mock<ILogger<HelloAssoClient>>();
         var secrets = BuildSecretsService();
-        var httpClient = new HttpClient(handler);
-        return new HelloAssoClient(httpClient, secrets.Object, logger.Object, configuration);
+        return TestClientFactory.Build(handler, secrets.Object, configuration);
     }
 
     /// <summary>

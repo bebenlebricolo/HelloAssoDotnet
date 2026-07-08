@@ -9,7 +9,7 @@ public record CompanyLegalStatus
     /// <summary>
     /// Stable identifier of the legal status.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// Human readable label.
@@ -27,7 +27,7 @@ public record OrganizationCategory
     /// <summary>
     /// Stable identifier of the category.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// Human readable label.
@@ -55,7 +55,7 @@ public record PublicTag
     /// <summary>
     /// Relevance score of the tag.
     /// </summary>
-    public double Score { get; set; }
+    public double Score { get; set; } = 0;
 }
 
 /// <summary>
@@ -68,7 +68,7 @@ public record FormSubType
     /// <summary>
     /// Stable identifier of the sub-type.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// Human readable label.

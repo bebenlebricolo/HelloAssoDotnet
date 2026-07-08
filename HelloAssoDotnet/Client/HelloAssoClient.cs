@@ -1,10 +1,6 @@
-using HelloAssoDotnet.Client;
 using HelloAssoDotnet.Models.Configuration;
 using HelloAssoDotnet.Models.Api.Auth;
 using HelloAssoDotnet.Models.PublicApi;
-using HelloAssoDotnet.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace HelloAssoDotnet.Client;
 
@@ -12,8 +8,8 @@ namespace HelloAssoDotnet.Client;
 /// Provides a client for interacting with the HelloAsso API, enabling operations such as
 /// authentication, retrieving payment details, fetching organization forms, and downloading receipts or event tickets.
 /// This facade exposes the API surface through resource sub-clients. Authentication and the in-memory token
-/// cache live on the shared <see cref="HelloAssoConnection"/>, which is created first and handed to every
-/// sub-client; the facade does not wrap requests behind an executor.
+/// cache live on the shared <see cref="HelloAssoConnection"/>; every collaborator is injected by the DI
+/// container (see <c>AddHelloAsso</c>) - the facade does not build anything itself.
 /// </summary>
 public class HelloAssoClient : IHelloAssoClient
 {
@@ -63,37 +59,49 @@ public class HelloAssoClient : IHelloAssoClient
     public INotificationsClient Notifications { get; }
 
     /// <summary>
-    /// Instantiates a basic HelloAssoClient
+    /// Instantiates the facade from its injected collaborators. Everything (the shared connection and the
+    /// resource sub-clients) is resolved by the DI container; nothing is constructed here.
     /// </summary>
-    /// <param name="httpClient">HttpClient used under the hood</param>
-    /// <param name="secretsService">Secret service is used to retrieve client id/ client secrets pair</param>
-    /// <param name="logger">Logger</param>
-    /// <param name="configuration">Static configuration, pulled from appsettings.</param>
-    public HelloAssoClient(HttpClient httpClient,
-                           IHelloAssoSecretsService secretsService,
-                           ILogger<HelloAssoClient> logger,
-                           IConfiguration configuration)
+    /// <param name="connection">Shared connection owning authentication and the token cache.</param>
+    /// <param name="organizations">Organizations sub-client.</param>
+    /// <param name="forms">Forms sub-client.</param>
+    /// <param name="orders">Orders sub-client.</param>
+    /// <param name="items">Items sub-client.</param>
+    /// <param name="payments">Payments sub-client.</param>
+    /// <param name="checkout">Checkout sub-client.</param>
+    /// <param name="directory">Directory sub-client.</param>
+    /// <param name="partners">Partners sub-client.</param>
+    /// <param name="users">Users sub-client.</param>
+    /// <param name="values">Values sub-client.</param>
+    /// <param name="cashOut">Cash-out sub-client.</param>
+    /// <param name="notifications">Notifications sub-client.</param>
+    public HelloAssoClient(HelloAssoConnection connection,
+                           IOrganizationsClient organizations,
+                           IFormsClient forms,
+                           IOrdersClient orders,
+                           IItemsClient items,
+                           IPaymentsClient payments,
+                           ICheckoutClient checkout,
+                           IDirectoryClient directory,
+                           IPartnersClient partners,
+                           IUsersClient users,
+                           IValuesClient values,
+                           ICashOutClient cashOut,
+                           INotificationsClient notifications)
     {
-        var appsettingsConfiguration = new AppsettingsConfiguration();
-        appsettingsConfiguration.FromConfig(configuration);
-
-        // Build the shared connection first so sub-clients receive a fully-constructed context (no leaked
-        // partially-initialized "this").
-        _connection = new HelloAssoConnection(httpClient, secretsService, logger, appsettingsConfiguration);
-
-        // Sub-clients share this connection (via IHelloAssoClientContext) for config + token access.
-        Organizations = new OrganizationsClient(_connection);
-        Forms = new FormsClient(_connection);
-        Orders = new OrdersClient(_connection);
-        Items = new ItemsClient(_connection);
-        Payments = new PaymentsClient(_connection);
-        Checkout = new CheckoutClient(_connection);
-        Directory = new DirectoryClient(_connection);
-        Partners = new PartnersClient(_connection);
-        Users = new UsersClient(_connection);
-        Values = new ValuesClient(_connection);
-        CashOut = new CashOutClient(_connection);
-        Notifications = new NotificationsClient(_connection);
+        _connection = connection;
+        Organizations = organizations;
+        Forms = forms;
+        Orders = orders;
+        Items = items;
+        Payments = payments;
+        Checkout = checkout;
+        Directory = directory;
+        Partners = partners;
+        Users = users;
+        Values = values;
+        CashOut = cashOut;
+        Notifications = notifications;
     }
 
     /// <inheritdoc />

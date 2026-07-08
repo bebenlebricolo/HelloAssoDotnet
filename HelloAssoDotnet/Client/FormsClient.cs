@@ -1,5 +1,6 @@
 using HelloAssoDotnet.Models.Api.Auth;
 using HelloAssoDotnet.Models.Api.Forms;
+using HelloAssoDotnet.Models.Api.Order;
 using HelloAssoDotnet.Models.PublicApi;
 using HelloAssoDotnet.Utils;
 
@@ -13,12 +14,12 @@ internal sealed class FormsClient : HelloAssoSubClient, IFormsClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<ListOrganizationFormsResponse>> ListAsync(ListOrganizationFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<FormLightModel>>> ListAsync(ListOrganizationFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<ListOrganizationFormsResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<FormLightModel>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/forms";
@@ -29,13 +30,13 @@ internal sealed class FormsClient : HelloAssoSubClient, IFormsClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<ListOrganizationFormsResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<FormLightModel>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
     public IAsyncEnumerable<FormLightModel> ListAllAsync(ListOrganizationFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
-        return HelloAssoPager.PageAllAsync<ListOrganizationFormsResponse, FormLightModel>(
+        return HelloAssoPager.PageAllAsync<PaginatedResponse<FormLightModel>, FormLightModel>(
             (continuationToken, ct) =>
             {
                 var pageRequest = request with { ContinuationToken = continuationToken };
@@ -90,12 +91,12 @@ internal sealed class FormsClient : HelloAssoSubClient, IFormsClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<ListItemsResponse>> GetItemsAsync(FormType formType, string formSlug, ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<OrderItem>>> GetItemsAsync(FormType formType, string formSlug, ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<ListItemsResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<OrderItem>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/forms/{formType}/{formSlug}/items";
@@ -106,16 +107,16 @@ internal sealed class FormsClient : HelloAssoSubClient, IFormsClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<ListItemsResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<OrderItem>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<Result<ListOrdersResponse>> GetOrdersAsync(FormType formType, string formSlug, ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<OrderDetails>>> GetOrdersAsync(FormType formType, string formSlug, ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<ListOrdersResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<OrderDetails>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/forms/{formType}/{formSlug}/orders";
@@ -126,16 +127,16 @@ internal sealed class FormsClient : HelloAssoSubClient, IFormsClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<ListOrdersResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<OrderDetails>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<Result<SearchPaymentResponse>> GetPaymentsAsync(FormType formType, string formSlug, SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<PaymentResponse>>> GetPaymentsAsync(FormType formType, string formSlug, SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<SearchPaymentResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<PaymentResponse>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/forms/{formType}/{formSlug}/payments";
@@ -146,7 +147,7 @@ internal sealed class FormsClient : HelloAssoSubClient, IFormsClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<SearchPaymentResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<PaymentResponse>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />

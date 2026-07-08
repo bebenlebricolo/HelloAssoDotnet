@@ -1,4 +1,5 @@
 using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Organizations;
 using HelloAssoDotnet.Models.Api.Partners;
 using HelloAssoDotnet.Models.PublicApi;
 using HelloAssoDotnet.Utils;
@@ -31,12 +32,12 @@ internal sealed class PartnersClient : HelloAssoSubClient, IPartnersClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<ListOrganizationsResponse>> GetOrganizationsAsync(string? continuationToken = null, int? pageSize = null, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<OrganizationLightModel>>> GetOrganizationsAsync(string? continuationToken = null, int? pageSize = null, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<ListOrganizationsResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<OrganizationLightModel>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/partners/me/organizations";
@@ -55,6 +56,6 @@ internal sealed class PartnersClient : HelloAssoSubClient, IPartnersClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<ListOrganizationsResponse>(request, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<OrganizationLightModel>>(request, Context.Logger, cancellationToken);
     }
 }

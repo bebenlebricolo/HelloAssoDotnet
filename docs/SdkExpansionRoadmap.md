@@ -14,6 +14,7 @@ Durable roadmap for growing [`HelloAssoClient`](../HelloAssoDotnet/Client/HelloA
 | Phase 2 | Webhooks / notifications (explicit polymorphic `ReadData`) | Done (v2.0.0) |
 | Phase 2 | Wiring rework: extract `HelloAssoConnection`, token-cache concurrency | Done (v2.0.0) |
 | Phase 2.5 | Structural refactor: pagination base record + namespace/folder tidy | Done (v2.0.0) |
+| Phase 2.6 | PR review round 2: full DI, config-driven URLs, drop pagination aliases, throttling | Done (v2.0.0) |
 | Phase 3 | Write-capable endpoints | Deferred (future) |
 
 ## Guiding principles
@@ -101,7 +102,7 @@ Grouped into sub-clients. All GET unless noted.
 
 ## Phase 1.5 - Spec reconciliation (done, v2.0.0)
 
-Reconciled the implementation against the validated OpenAPI spec [`helloasso.json`](../.cache/helloasso.json). Fixes:
+Reconciled the implementation against the validated OpenAPI spec [`helloasso.json`](https://github.com/HelloAsso/helloasso-open-api). Fixes:
 
 - Paths: `formtypes` -> `formTypes`; `values/organization-categories` -> `values/organization/categories`; `values/forms/{type}/types` -> `values/form/{type}/types`.
 - Query params: item listing now sends `itemStates` (was `states`).
@@ -132,6 +133,17 @@ Separated from correctness work so the churn landed in its own reviewable step. 
 
 - Replaced the `IPaginatedResponse<T>` interface with a shared base [`PaginatedResponse<T>`](../HelloAssoDotnet.Models/PublicApi/PaginatedResponse.cs) `record`; the listing responses now derive from it and `HelloAssoPager` is constrained to it.
 - Collapsed the interface/impl folder split (sub-clients moved from `Client/SubClients/` into `Client/`, namespace `HelloAssoDotnet.Client`) and renamed `HelloAssoDotnet.Models.HelloAssoApi.*` -> `HelloAssoDotnet.Models.Api.*`.
+
+## Phase 2.6 - PR review round 2 (done, v2.0.0)
+
+Follow-up on the second batch of PR comments (breaking, fine pre-release on the v2.0.0 line).
+
+- Config-driven URLs: the production/sandbox base + OAuth URLs now live on [`AppsettingsConfiguration`](../HelloAssoDotnet.Models/Configuration/AppsettingsConfiguration.cs) (`ApiBaseUrl`/`OauthTokenUrl`), defaulting to the environment's URLs (resolved via classic `switch`/`case`) and overridable from configuration. Removed `HelloAssoEnvironmentUris`.
+- Full DI: [`HelloAssoConnection`](../HelloAssoDotnet/Client/HelloAssoConnection.cs) is now `public`, backed by a named `IHttpClientFactory` client, and every collaborator (connection + sub-clients + facade) is registered and injected by [`AddHelloAsso`](../HelloAssoDotnet/Extensions/HelloAssoServiceCollectionExtensions.cs). [`HelloAssoClient`](../HelloAssoDotnet/Client/HelloAssoClient.cs) no longer news anything in its constructor. Tests build the graph through a shared `TestClientFactory`.
+- Pagination: `PaginatedResponse<T>` is now a concrete record used directly at the call sites; the empty alias records (`ListOrdersResponse`, `SearchPaymentResponse`, ...) were dropped.
+- Notifications: added an inline comment explaining the hand-written polymorphic parsing and converted the switch expressions to classic `switch`/`case`.
+- Throttling: `OrdersClient.GetEventTicketsPdfAsync` now downloads tickets with a bounded degree of parallelism (`SemaphoreSlim`).
+- Misc: renamed the `MechanismsTest` suite to `HelpersTest`, made new model default values explicit, and fixed a non-versioned spec link.
 
 ## Phase 3 - Write-capable endpoints (future, do later)
 

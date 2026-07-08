@@ -16,7 +16,7 @@ public interface IPaymentsClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of payments.</returns>
-    Task<Result<SearchPaymentResponse>> SearchAsync(SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<PaymentResponse>>> SearchAsync(SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enumerates every payment matching the filters, transparently following the continuation token.
@@ -34,7 +34,7 @@ public interface IPaymentsClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The authorized payments matching the email.</returns>
-    Task<Result<SearchPaymentResponse>> SearchForUserAsync(string email, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<PaymentResponse>>> SearchForUserAsync(string email, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a single payment by id.

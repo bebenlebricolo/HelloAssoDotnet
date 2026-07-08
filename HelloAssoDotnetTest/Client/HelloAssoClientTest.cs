@@ -88,7 +88,6 @@ public class Tests
     [Test]
     public async Task ClientAuth_Ok()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -113,8 +112,7 @@ public class Tests
                                             }}")
             });
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.AuthenticateAsync();
         Assert.That(result.IsOk, Is.True);
@@ -133,14 +131,12 @@ public class Tests
     [Test]
     public async Task ClientAuth_Unauthorized()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.Unauthorized);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var result = await client.AuthenticateAsync();
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.Unauthenticated));
@@ -152,14 +148,12 @@ public class Tests
     [Test]
     public async Task ClientTokenRefresh_Unauthorized()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.Unauthorized);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var result = await client.AuthenticateAsync();
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.Unauthenticated));
@@ -171,7 +165,6 @@ public class Tests
     [Test]
     public async Task GetPaymentForUserAsync_OK()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -188,8 +181,7 @@ public class Tests
                 Content = new StringContent(resourceJson)
             });
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var result = await client.Payments.SearchForUserAsync("test email", GenerateFakeTokens());
         var payments = result.Value;
         Assert.That(result.IsOk, Is.True);
@@ -209,14 +201,12 @@ public class Tests
     [Test]
     public async Task GetPaymentForUserAsync_NotFound()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.NotFound);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var result = await client.Payments.SearchForUserAsync("test email", GenerateFakeTokens());
         Assert.That(result.IsOk, Is.False);
         Assert.That(result.Error, Is.EqualTo(Errors.NotFound));
@@ -255,7 +245,6 @@ public class Tests
     [Test]
     public async Task GetReceiptPdfAsync_OK()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -271,8 +260,7 @@ public class Tests
                 Content = new StreamContent(fakeStream)
             });
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var fakePayment = GenerateFakePaymentResponse();
         var fakeTokens = GenerateFakeTokens();
 
@@ -287,14 +275,12 @@ public class Tests
     [Test]
     public async Task GetReceiptPdfAsync_Unauthorized()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.Unauthorized);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var fakePayment = GenerateFakePaymentResponse();
         var fakeTokens = GenerateFakeTokens();
 
@@ -309,14 +295,12 @@ public class Tests
     [Test]
     public async Task? GetReceiptPdfAsync_NotFound()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.NotFound);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
         var fakePayment = GenerateFakePaymentResponse();
         var fakeTokens = GenerateFakeTokens();
         var result = await client.Payments.GetReceiptPdfAsync(fakePayment, fakeTokens);
@@ -334,7 +318,6 @@ public class Tests
     [Test]
     public async Task GetTicketsPdfAsync_OKSingle()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -373,8 +356,7 @@ public class Tests
                 Content = new StreamContent(fakeStream)
             });
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.True);
@@ -385,7 +367,6 @@ public class Tests
     [Test]
     public async Task GetTicketsPdfAsync_OKMultiple()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -428,8 +409,7 @@ public class Tests
                 Content = new StreamContent(fakeStream)
             });
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.True);
@@ -446,7 +426,6 @@ public class Tests
     [Test]
     public async Task GetTicketsPdfAsync_Unauthorized()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -454,8 +433,7 @@ public class Tests
         var fakeTokens = GenerateFakeTokens();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.Unauthorized);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
@@ -468,7 +446,6 @@ public class Tests
     [Test]
     public async Task GetTicketsPdfAsync_NotFound()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -476,8 +453,7 @@ public class Tests
         var fakeTokens = GenerateFakeTokens();
         SetupMessageHandlerBasicError(ref mockHttpMessageHandler, HttpStatusCode.NotFound);
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
@@ -490,7 +466,6 @@ public class Tests
     [Test]
     public async Task GetTicketsPdfAsync_OneTicketIsMissing()
     {
-       var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -541,8 +516,7 @@ public class Tests
                                               ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound));
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Orders.GetEventTicketsPdfAsync(fakePayment, fakeTokens);
         Assert.That(result.IsOk, Is.False);
@@ -555,7 +529,6 @@ public class Tests
     [Test]
     public async Task GetFormDetailsAsync_Ok()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -575,8 +548,7 @@ public class Tests
             });
 
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var formSlug = "carte-bloc-session-2";
         var formType = FormType.Event;
@@ -623,7 +595,6 @@ public class Tests
     [Test]
     public async Task GetFormDetailsAsync_Unauthorized()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -637,8 +608,7 @@ public class Tests
                                               ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Forbidden));
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Forms.GetPublicDetailsAsync("test-slug", FormType.Event, fakeTokens);
         Assert.That(result.IsOk, Is.False);
@@ -648,7 +618,6 @@ public class Tests
     [Test]
     public async Task GetFormDetailsAsync_NotFound()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -662,8 +631,7 @@ public class Tests
                                               ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound));
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var result = await client.Forms.GetPublicDetailsAsync("test-slug", FormType.Event, fakeTokens);
         Assert.That(result.IsOk, Is.False);
@@ -673,7 +641,6 @@ public class Tests
     [Test]
     public async Task GetAllFormsAsync_Ok()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -690,8 +657,7 @@ public class Tests
                 Content = new StringContent(formsResponse),
             });
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var request = new ListOrganizationFormsRequest();
 
@@ -721,7 +687,6 @@ public class Tests
     [Test]
     public async Task GetAllFormsAsync_NotFound()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -735,8 +700,7 @@ public class Tests
                                               ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound));
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var request = new ListOrganizationFormsRequest();
 
@@ -748,7 +712,6 @@ public class Tests
     [Test]
     public async Task GetAllFormsAsync_Unauthorized()
     {
-        var mockLogger = new Mock<ILogger<HelloAssoClient>>();
         var mockSecretsService = new Mock<IHelloAssoSecretsService>();
         SetupSecretsService(ref mockSecretsService);
         var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -762,8 +725,7 @@ public class Tests
                                               ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Forbidden));
 
-        var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-        var client = new HelloAssoClient(httpClient, mockSecretsService.Object, mockLogger.Object, GetConfiguration());
+        var client = TestClientFactory.Build(mockHttpMessageHandler.Object, mockSecretsService.Object, GetConfiguration());
 
         var request = new ListOrganizationFormsRequest();
 

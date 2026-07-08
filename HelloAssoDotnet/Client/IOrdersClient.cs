@@ -27,7 +27,7 @@ public interface IOrdersClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of orders.</returns>
-    Task<Result<ListOrdersResponse>> ListForOrganizationAsync(ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<OrderDetails>>> ListForOrganizationAsync(ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enumerates every order of the configured organization, transparently following the continuation token.

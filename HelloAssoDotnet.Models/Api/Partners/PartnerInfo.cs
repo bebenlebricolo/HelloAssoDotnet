@@ -115,27 +115,27 @@ public record PartnerStatisticsModel
     /// <summary>
     /// Number of organizations linked to the partner.
     /// </summary>
-    public int LinkedOrganizationsCount { get; set; }
+    public int LinkedOrganizationsCount { get; set; } = 0;
 
     /// <summary>
     /// Total amount collected by linked organizations, in cents.
     /// </summary>
-    public long LinkedOrganizationsCollectedAmount { get; set; }
+    public long LinkedOrganizationsCollectedAmount { get; set; } = 0;
 
     /// <summary>
     /// Total amount collected through checkout, in cents.
     /// </summary>
-    public long CheckoutCollectedAmount { get; set; }
+    public long CheckoutCollectedAmount { get; set; } = 0;
 
     /// <summary>
     /// Number of organizations using checkout.
     /// </summary>
-    public int OrganizationsUsingCheckout { get; set; }
+    public int OrganizationsUsingCheckout { get; set; } = 0;
 
     /// <summary>
     /// Number of organizations for which an access token is available.
     /// </summary>
-    public int AvailableOrganizationsAccessTokenCount { get; set; }
+    public int AvailableOrganizationsAccessTokenCount { get; set; } = 0;
 }
 
 /// <summary>

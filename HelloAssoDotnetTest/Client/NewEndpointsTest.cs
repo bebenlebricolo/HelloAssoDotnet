@@ -38,7 +38,7 @@ public class NewEndpointsTest
     /// <summary>
     /// Builds a client whose handler always returns the given JSON, and captures the last request seen.
     /// </summary>
-    private static HelloAssoClient BuildClient(string json, out Func<HttpRequestMessage?> lastRequest, HttpStatusCode statusCode = HttpStatusCode.OK)
+    private static IHelloAssoClient BuildClient(string json, out Func<HttpRequestMessage?> lastRequest, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         HttpRequestMessage? captured = null;
         var handler = new Mock<HttpMessageHandler>();
@@ -47,14 +47,12 @@ public class NewEndpointsTest
             .Callback<HttpRequestMessage, CancellationToken>((request, _) => captured = request)
             .ReturnsAsync(() => new HttpResponseMessage(statusCode) { Content = new StringContent(json) });
 
-        var logger = new Mock<ILogger<HelloAssoClient>>();
         var secrets = new Mock<IHelloAssoSecretsService>();
         secrets.Setup(s => s.GetClientId()).Returns("test id");
         secrets.Setup(s => s.GetClientSecret()).Returns("test secret");
-        var httpClient = new HttpClient(handler.Object);
 
         lastRequest = () => captured;
-        return new HelloAssoClient(httpClient, secrets.Object, logger.Object, GetConfiguration());
+        return TestClientFactory.Build(handler.Object, secrets.Object, GetConfiguration());
     }
 
     [Test]

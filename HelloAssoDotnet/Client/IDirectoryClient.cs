@@ -1,4 +1,6 @@
 using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Forms;
+using HelloAssoDotnet.Models.Api.Organizations;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;
@@ -17,7 +19,7 @@ public interface IDirectoryClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of forms.</returns>
-    Task<Result<DirectoryFormsResponse>> SearchFormsAsync(DirectoryFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<FormLightModel>>> SearchFormsAsync(DirectoryFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Searches the public directory of organizations.
@@ -27,5 +29,5 @@ public interface IDirectoryClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of organizations.</returns>
-    Task<Result<DirectoryOrganizationsResponse>> SearchOrganizationsAsync(DirectoryOrganizationsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<OrganizationLightModel>>> SearchOrganizationsAsync(DirectoryOrganizationsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 }

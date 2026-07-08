@@ -12,12 +12,19 @@ namespace HelloAssoDotnet.Client;
 /// <summary>
 /// The shared root node behind <see cref="HelloAssoClient"/>. It owns the state every sub-client needs
 /// (the <see cref="HttpClient"/>, configuration, resolved base URI, logger) and the OAuth token cache with
-/// auto-refresh. It is a concrete object constructed before the sub-clients, so the facade never has to
-/// leak a partially-constructed <c>this</c> into them.
+/// auto-refresh. It is resolved once from the DI container and handed to every sub-client, so there is a
+/// single shared token cache.
 /// It is NOT a request-executing layer: sub-clients still build and send their own requests directly.
 /// </summary>
-internal sealed class HelloAssoConnection : IHelloAssoClientContext
+public class HelloAssoConnection : IHelloAssoClientContext
 {
+    /// <summary>
+    /// Name of the <see cref="System.Net.Http.HttpClient"/> registered for the HelloAsso connection. Tests and
+    /// advanced callers can configure this named client (e.g. the primary message handler) through the usual
+    /// <c>IHttpClientFactory</c> configuration.
+    /// </summary>
+    public const string HttpClientName = "HelloAsso";
+
     private readonly HttpClient _httpClient;
     private readonly Uri _baseUri;
     private readonly Uri _oauthEndpoint;
@@ -52,25 +59,25 @@ internal sealed class HelloAssoConnection : IHelloAssoClientContext
     };
 
     /// <summary>
-    /// Builds the connection, resolving the API + OAuth endpoints from the configured environment.
+    /// Builds the connection, resolving the API + OAuth endpoints from the configured URLs.
     /// </summary>
-    /// <param name="httpClient">HttpClient shared by every sub-client.</param>
+    /// <param name="httpClientFactory">Factory used to create the shared named HttpClient.</param>
     /// <param name="secretsService">Secret service used to retrieve the client id / client secret pair.</param>
     /// <param name="logger">Logger.</param>
     /// <param name="appsettingsConfiguration">Static configuration, pulled from appsettings.</param>
-    public HelloAssoConnection(HttpClient httpClient,
+    public HelloAssoConnection(IHttpClientFactory httpClientFactory,
                                IHelloAssoSecretsService secretsService,
-                               ILogger logger,
+                               ILogger<HelloAssoConnection> logger,
                                AppsettingsConfiguration appsettingsConfiguration)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient(HttpClientName);
         _secretsService = secretsService;
         _logger = logger;
         _appsettingsConfiguration = appsettingsConfiguration;
 
-        // Resolve the API + OAuth endpoints from the configured environment (production vs sandbox).
-        _baseUri = HelloAssoEnvironmentUris.GetApiBaseUri(_appsettingsConfiguration.Environment);
-        _oauthEndpoint = HelloAssoEnvironmentUris.GetOauthTokenUri(_appsettingsConfiguration.Environment);
+        // API + OAuth endpoints come from configuration (defaulting to the URLs of the selected environment).
+        _baseUri = new Uri(_appsettingsConfiguration.ApiBaseUrl);
+        _oauthEndpoint = new Uri(_appsettingsConfiguration.OauthTokenUrl);
     }
 
     /// <summary>

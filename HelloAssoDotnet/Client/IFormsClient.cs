@@ -1,5 +1,6 @@
 using HelloAssoDotnet.Models.Api.Auth;
 using HelloAssoDotnet.Models.Api.Forms;
+using HelloAssoDotnet.Models.Api.Order;
 using HelloAssoDotnet.Models.PublicApi;
 
 namespace HelloAssoDotnet.Client;
@@ -17,7 +18,7 @@ public interface IFormsClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of forms.</returns>
-    Task<Result<ListOrganizationFormsResponse>> ListAsync(ListOrganizationFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<FormLightModel>>> ListAsync(ListOrganizationFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Enumerates every form of the configured organization, transparently following the continuation token.
@@ -59,7 +60,7 @@ public interface IFormsClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of items.</returns>
-    Task<Result<ListItemsResponse>> GetItemsAsync(FormType formType, string formSlug, ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<OrderItem>>> GetItemsAsync(FormType formType, string formSlug, ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists the orders placed on a form.
@@ -71,7 +72,7 @@ public interface IFormsClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of orders.</returns>
-    Task<Result<ListOrdersResponse>> GetOrdersAsync(FormType formType, string formSlug, ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<OrderDetails>>> GetOrdersAsync(FormType formType, string formSlug, ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lists the payments made on a form.
@@ -83,7 +84,7 @@ public interface IFormsClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of payments.</returns>
-    Task<Result<SearchPaymentResponse>> GetPaymentsAsync(FormType formType, string formSlug, SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<PaymentResponse>>> GetPaymentsAsync(FormType formType, string formSlug, SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves aggregated statistics for a form.

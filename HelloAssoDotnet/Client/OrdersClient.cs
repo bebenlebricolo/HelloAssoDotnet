@@ -9,6 +9,12 @@ namespace HelloAssoDotnet.Client;
 /// <inheritdoc cref="IOrdersClient" />
 internal sealed class OrdersClient : HelloAssoSubClient, IOrdersClient
 {
+    /// <summary>
+    /// Upper bound on parallel ticket-PDF downloads. Downloading every ticket of a large order at once would
+    /// hammer HelloAsso and risk being rate-limited/flagged, so the fan-out is capped.
+    /// </summary>
+    private const int MaxConcurrentTicketDownloads = 4;
+
     public OrdersClient(IHelloAssoClientContext context) : base(context)
     {
     }
@@ -32,12 +38,12 @@ internal sealed class OrdersClient : HelloAssoSubClient, IOrdersClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<ListOrdersResponse>> ListForOrganizationAsync(ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<OrderDetails>>> ListForOrganizationAsync(ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<ListOrdersResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<OrderDetails>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/orders";
@@ -48,13 +54,13 @@ internal sealed class OrdersClient : HelloAssoSubClient, IOrdersClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<ListOrdersResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<OrderDetails>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
     public IAsyncEnumerable<OrderDetails> ListAllForOrganizationAsync(ListOrdersRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
-        return HelloAssoPager.PageAllAsync<ListOrdersResponse, OrderDetails>(
+        return HelloAssoPager.PageAllAsync<PaginatedResponse<OrderDetails>, OrderDetails>(
             (continuationToken, ct) =>
             {
                 var pageRequest = request with { ContinuationToken = continuationToken };
@@ -83,16 +89,28 @@ internal sealed class OrdersClient : HelloAssoSubClient, IOrdersClient
         List<string> ticketsUrls = orderDetails.Value!.Items!.Select(ticket => ticket.TicketUrl).ToList()!;
         List<Stream> ticketsPdfs = new List<Stream>();
 
-        List<Task<HttpResponseMessage>> tasks = new List<Task<HttpResponseMessage>>();
-        foreach (var ticketUrl in ticketsUrls)
+        // Download the tickets with a bounded degree of parallelism. The throttler gates concurrent requests
+        // while Select preserves order, so tasks[i] still matches ticketsUrls[i] below.
+        using var throttler = new SemaphoreSlim(MaxConcurrentTicketDownloads);
+
+        async Task<HttpResponseMessage> DownloadTicketAsync(string ticketUrl)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, ticketUrl)
-                .WithBearer(accessToken.Value!)
-                .WithUserAgent(Context.Config)
-                .WithPdfAccept();
-            var task = Context.HttpClient.SendAsync(request, cancellationToken);
-            tasks.Add(task);
+            await throttler.WaitAsync(cancellationToken);
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, ticketUrl)
+                    .WithBearer(accessToken.Value!)
+                    .WithUserAgent(Context.Config)
+                    .WithPdfAccept();
+                return await Context.HttpClient.SendAsync(request, cancellationToken);
+            }
+            finally
+            {
+                throttler.Release();
+            }
         }
+
+        List<Task<HttpResponseMessage>> tasks = ticketsUrls.Select(DownloadTicketAsync).ToList();
 
         // Wait all tasks
         await Task.WhenAll(tasks).ConfigureAwait(false);

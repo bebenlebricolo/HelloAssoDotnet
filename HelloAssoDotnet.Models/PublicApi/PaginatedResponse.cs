@@ -4,11 +4,12 @@ namespace HelloAssoDotnet.Models.PublicApi;
 
 /// <summary>
 /// Common shape of every paginated HelloAsso listing response: a <see cref="Data"/> page and the
-/// <see cref="Pagination"/> metadata used to iterate further (via the continuation token). Concrete
-/// listing responses derive from this record so a single generic auto-pager can walk any of them.
+/// <see cref="Pagination"/> metadata used to iterate further (via the continuation token). Listing endpoints
+/// use this record directly (there is nothing endpoint-specific to add), and the generic auto-pager walks any
+/// instance of it.
 /// </summary>
 /// <typeparam name="T">Type of the elements contained in a page.</typeparam>
-public abstract record PaginatedResponse<T>
+public record PaginatedResponse<T>
 {
     /// <summary>
     /// Current page of results.

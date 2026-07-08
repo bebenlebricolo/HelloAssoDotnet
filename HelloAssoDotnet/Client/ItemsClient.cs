@@ -31,12 +31,12 @@ internal sealed class ItemsClient : HelloAssoSubClient, IItemsClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<ListItemsResponse>> ListForOrganizationAsync(ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<OrderItem>>> ListForOrganizationAsync(ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<ListItemsResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<OrderItem>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/items";
@@ -47,13 +47,13 @@ internal sealed class ItemsClient : HelloAssoSubClient, IItemsClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<ListItemsResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<OrderItem>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
     public IAsyncEnumerable<OrderItem> ListAllForOrganizationAsync(ListItemsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
-        return HelloAssoPager.PageAllAsync<ListItemsResponse, OrderItem>(
+        return HelloAssoPager.PageAllAsync<PaginatedResponse<OrderItem>, OrderItem>(
             (continuationToken, ct) =>
             {
                 var pageRequest = request with { ContinuationToken = continuationToken };

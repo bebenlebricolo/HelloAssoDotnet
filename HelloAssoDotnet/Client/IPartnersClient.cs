@@ -1,4 +1,5 @@
 using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Organizations;
 using HelloAssoDotnet.Models.Api.Partners;
 using HelloAssoDotnet.Models.PublicApi;
 
@@ -27,5 +28,5 @@ public interface IPartnersClient
     /// <param name="tokens">Optional explicit tokens. When null, the cached token is used.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A single page of organizations.</returns>
-    Task<Result<ListOrganizationsResponse>> GetOrganizationsAsync(string? continuationToken = null, int? pageSize = null, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedResponse<OrganizationLightModel>>> GetOrganizationsAsync(string? continuationToken = null, int? pageSize = null, AuthTokens? tokens = null, CancellationToken cancellationToken = default);
 }

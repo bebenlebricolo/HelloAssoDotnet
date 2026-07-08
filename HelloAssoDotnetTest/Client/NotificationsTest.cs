@@ -30,17 +30,15 @@ public class NotificationsTest
         return builder.Build();
     }
 
-    private static HelloAssoClient BuildClient(HttpMessageHandler handler)
+    private static IHelloAssoClient BuildClient(HttpMessageHandler handler)
     {
-        var logger = new Mock<ILogger<HelloAssoClient>>();
         var secrets = new Mock<IHelloAssoSecretsService>();
         secrets.Setup(s => s.GetClientId()).Returns("test id");
         secrets.Setup(s => s.GetClientSecret()).Returns("test secret");
-        var httpClient = new HttpClient(handler);
-        return new HelloAssoClient(httpClient, secrets.Object, logger.Object, GetConfiguration());
+        return TestClientFactory.Build(handler, secrets.Object, GetConfiguration());
     }
 
-    private static HelloAssoClient BuildClientReturning(HttpStatusCode statusCode)
+    private static IHelloAssoClient BuildClientReturning(HttpStatusCode statusCode)
     {
         var handler = new Mock<HttpMessageHandler>();
         handler.Protected()

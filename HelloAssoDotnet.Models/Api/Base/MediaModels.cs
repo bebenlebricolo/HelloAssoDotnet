@@ -14,7 +14,7 @@ public record ImageModel
     /// <summary>
     /// Stable identifier of the image.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// Public URL of the image.
@@ -31,7 +31,7 @@ public record VideoModel
     /// <summary>
     /// Stable identifier of the video.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// Public URL of the video.

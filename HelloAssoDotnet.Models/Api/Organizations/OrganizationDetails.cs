@@ -63,12 +63,12 @@ public record OrganizationDetails
     /// <summary>
     /// Whether the organization is eligible to issue fiscal receipts.
     /// </summary>
-    public bool FiscalReceiptEligibility { get; set; }
+    public bool FiscalReceiptEligibility { get; set; } = false;
 
     /// <summary>
     /// Whether the organization has enabled fiscal receipt issuance.
     /// </summary>
-    public bool FiscalReceiptIssuanceEnabled { get; set; }
+    public bool FiscalReceiptIssuanceEnabled { get; set; } = false;
 
     /// <summary>
     /// Legal type of the organization (association 1901, fondation, etc.).

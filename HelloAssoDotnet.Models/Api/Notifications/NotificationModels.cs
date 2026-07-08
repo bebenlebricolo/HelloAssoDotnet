@@ -168,7 +168,7 @@ public record NotificationVerification
     /// <summary>
     /// Whether the notification was successfully verified as authentic.
     /// </summary>
-    public bool IsAuthentic { get; init; }
+    public bool IsAuthentic { get; init; } = false;
 
     /// <summary>
     /// Optional human-readable reason (useful when the verification failed).

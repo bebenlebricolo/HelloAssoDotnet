@@ -12,7 +12,7 @@ public record FormStats
     /// <summary>
     /// Total number of participants on the form.
     /// </summary>
-    public int TotalParticipant { get; set; }
+    public int TotalParticipant { get; set; } = 0;
 
     /// <summary>
     /// Per-tier statistics for the tiers that are not grouped.
@@ -33,7 +33,7 @@ public record TierStats
     /// <summary>
     /// Stable identifier of the tier.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// Tier label.
@@ -48,7 +48,7 @@ public record TierStats
     /// <summary>
     /// Number of entries already taken for this tier.
     /// </summary>
-    public int EntriesTaken { get; set; }
+    public int EntriesTaken { get; set; } = 0;
 
     /// <summary>
     /// Maximum number of entries available for this tier, when limited.
@@ -78,5 +78,5 @@ public record TierStats
     /// <summary>
     /// Whether the tier is currently enabled.
     /// </summary>
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; set; } = false;
 }

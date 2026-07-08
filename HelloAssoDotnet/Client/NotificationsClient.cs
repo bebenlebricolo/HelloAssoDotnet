@@ -25,6 +25,11 @@ internal sealed class NotificationsClient : HelloAssoSubClient, INotificationsCl
 
         try
         {
+            // The webhook envelope is read by hand with JsonDocument instead of being deserialized into a
+            // fixed type, because the body is polymorphic: the "data" property carries a different shape for
+            // each "eventType", and that shape is not described by the OpenAPI spec. Here we only extract the
+            // stable envelope fields (eventType + raw data + metadata); the payload interpretation is deferred
+            // to ReadData, and the raw JsonElement is kept as a fallback for unknown/new event types.
             using var document = JsonDocument.Parse(rawBody);
             var root = document.RootElement;
 
@@ -72,18 +77,39 @@ internal sealed class NotificationsClient : HelloAssoSubClient, INotificationsCl
         // no reflection): the resolution path is right here and easy to follow/debug. If the event type is
         // unknown (or the payload does not match the known model), we return null and the caller keeps the
         // raw notification.Data as an escape hatch.
-        return notification.EventType switch
+        switch (notification.EventType)
         {
-            NotificationEventType.Payment when TryDeserialize<PaymentResponse>(notification.Data, out var payment)
-                => new PaymentNotificationPayload(payment!),
-            NotificationEventType.Order when TryDeserialize<OrderDetails>(notification.Data, out var order)
-                => new OrderNotificationPayload(order!),
-            NotificationEventType.Form when TryDeserialize<FormNotificationData>(notification.Data, out var form)
-                => new FormNotificationPayload(form!),
-            NotificationEventType.Organization when TryDeserialize<OrganizationNotificationData>(notification.Data, out var organization)
-                => new OrganizationNotificationPayload(organization!),
-            _ => null,
-        };
+            case NotificationEventType.Payment:
+                if (TryDeserialize<PaymentResponse>(notification.Data, out var payment))
+                {
+                    return new PaymentNotificationPayload(payment!);
+                }
+                return null;
+
+            case NotificationEventType.Order:
+                if (TryDeserialize<OrderDetails>(notification.Data, out var order))
+                {
+                    return new OrderNotificationPayload(order!);
+                }
+                return null;
+
+            case NotificationEventType.Form:
+                if (TryDeserialize<FormNotificationData>(notification.Data, out var form))
+                {
+                    return new FormNotificationPayload(form!);
+                }
+                return null;
+
+            case NotificationEventType.Organization:
+                if (TryDeserialize<OrganizationNotificationData>(notification.Data, out var organization))
+                {
+                    return new OrganizationNotificationPayload(organization!);
+                }
+                return null;
+
+            default:
+                return null;
+        }
     }
 
     /// <summary>
@@ -114,12 +140,23 @@ internal sealed class NotificationsClient : HelloAssoSubClient, INotificationsCl
     public async Task<Result<NotificationVerification>> VerifyAuthenticityAsync(HelloAssoNotification notification, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         // Payment / Order notifications reference a resource we can re-fetch to prove authenticity.
-        string? relativePath = notification.EventType switch
+        string? relativePath = null;
+        switch (notification.EventType)
         {
-            NotificationEventType.Payment when TryGetId(notification.Data, out var paymentId) => $"payments/{paymentId}",
-            NotificationEventType.Order when TryGetId(notification.Data, out var orderId) => $"orders/{orderId}",
-            _ => null,
-        };
+            case NotificationEventType.Payment:
+                if (TryGetId(notification.Data, out var paymentId))
+                {
+                    relativePath = $"payments/{paymentId}";
+                }
+                break;
+
+            case NotificationEventType.Order:
+                if (TryGetId(notification.Data, out var orderId))
+                {
+                    relativePath = $"orders/{orderId}";
+                }
+                break;
+        }
 
         if (relativePath == null)
         {

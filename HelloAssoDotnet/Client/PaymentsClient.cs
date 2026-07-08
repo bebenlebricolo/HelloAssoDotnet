@@ -14,12 +14,12 @@ internal sealed class PaymentsClient : HelloAssoSubClient, IPaymentsClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<SearchPaymentResponse>> SearchAsync(SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<PaymentResponse>>> SearchAsync(SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<SearchPaymentResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<PaymentResponse>>.FromError(accessToken.Error);
         }
 
         var url = $"{Context.BaseUri}/organizations/{Context.OrganizationSlug}/payments";
@@ -30,13 +30,13 @@ internal sealed class PaymentsClient : HelloAssoSubClient, IPaymentsClient
             .WithUserAgent(Context.Config)
             .WithJsonAccept();
 
-        return await Context.HttpClient.SendJsonAsync<SearchPaymentResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<PaymentResponse>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
     public IAsyncEnumerable<PaymentResponse> SearchAllAsync(SearchPaymentsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
-        return HelloAssoPager.PageAllAsync<SearchPaymentResponse, PaymentResponse>(
+        return HelloAssoPager.PageAllAsync<PaginatedResponse<PaymentResponse>, PaymentResponse>(
             (continuationToken, ct) =>
             {
                 var pageRequest = request with { ContinuationToken = continuationToken };
@@ -46,7 +46,7 @@ internal sealed class PaymentsClient : HelloAssoSubClient, IPaymentsClient
     }
 
     /// <inheritdoc />
-    public Task<Result<SearchPaymentResponse>> SearchForUserAsync(string email, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public Task<Result<PaginatedResponse<PaymentResponse>>> SearchForUserAsync(string email, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var request = new SearchPaymentsRequest
         {

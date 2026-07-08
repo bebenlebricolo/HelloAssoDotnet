@@ -1,4 +1,6 @@
 using HelloAssoDotnet.Models.Api.Auth;
+using HelloAssoDotnet.Models.Api.Forms;
+using HelloAssoDotnet.Models.Api.Organizations;
 using HelloAssoDotnet.Models.PublicApi;
 using HelloAssoDotnet.Utils;
 
@@ -12,12 +14,12 @@ internal sealed class DirectoryClient : HelloAssoSubClient, IDirectoryClient
     }
 
     /// <inheritdoc />
-    public async Task<Result<DirectoryFormsResponse>> SearchFormsAsync(DirectoryFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<FormLightModel>>> SearchFormsAsync(DirectoryFormsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<DirectoryFormsResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<FormLightModel>>.FromError(accessToken.Error);
         }
 
         var url = BuildDirectoryUrl($"{Context.BaseUri}/directory/forms", request.PageSize, request.ContinuationToken);
@@ -27,16 +29,16 @@ internal sealed class DirectoryClient : HelloAssoSubClient, IDirectoryClient
             .WithJsonAccept()
             .WithJsonBody(request.Filters);
 
-        return await Context.HttpClient.SendJsonAsync<DirectoryFormsResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<FormLightModel>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<Result<DirectoryOrganizationsResponse>> SearchOrganizationsAsync(DirectoryOrganizationsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponse<OrganizationLightModel>>> SearchOrganizationsAsync(DirectoryOrganizationsRequest request, AuthTokens? tokens = null, CancellationToken cancellationToken = default)
     {
         var accessToken = await ResolveAccessTokenAsync(tokens, cancellationToken);
         if (!accessToken.IsOk)
         {
-            return Result<DirectoryOrganizationsResponse>.FromError(accessToken.Error);
+            return Result<PaginatedResponse<OrganizationLightModel>>.FromError(accessToken.Error);
         }
 
         var url = BuildDirectoryUrl($"{Context.BaseUri}/directory/organizations", request.PageSize, request.ContinuationToken);
@@ -46,7 +48,7 @@ internal sealed class DirectoryClient : HelloAssoSubClient, IDirectoryClient
             .WithJsonAccept()
             .WithJsonBody(request.Filters);
 
-        return await Context.HttpClient.SendJsonAsync<DirectoryOrganizationsResponse>(requestMessage, Context.Logger, cancellationToken);
+        return await Context.HttpClient.SendJsonAsync<PaginatedResponse<OrganizationLightModel>>(requestMessage, Context.Logger, cancellationToken);
     }
 
     private static string BuildDirectoryUrl(string url, int? pageSize, string? continuationToken)

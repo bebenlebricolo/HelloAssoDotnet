@@ -13,7 +13,7 @@ public record CheckoutIntentResponse
     /// <summary>
     /// Unique identifier of the checkout intent.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     /// <summary>
     /// URL the payer must be redirected to in order to complete the checkout.
