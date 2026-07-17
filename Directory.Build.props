@@ -1,10 +1,13 @@
 <Project>
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <Version>0.1.0</Version>
+        <Version>1.2.4</Version>
         <Authors>bebenlebricolo</Authors>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <!-- Disable packing when not built from HelloAssoDotnet's own solution -->
+        <IsPackable Condition="'$(SolutionName)' != 'HelloAssoDotnet'">false</IsPackable>
     </PropertyGroup>
 </Project>
