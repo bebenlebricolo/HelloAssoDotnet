@@ -4,6 +4,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>HelloAssoDotnet.Models</PackageId>
+        <Version>1.2.4</Version>
+        <IsPackable>true</IsPackable>
         <Description>Public data models used by the HelloAssoDotnet client library, decoupled so other tools can reference them without the client/services.</Description>
         <PackageTags>helloasso;api;models;rest;dotnet</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
