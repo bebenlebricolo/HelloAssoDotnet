@@ -33,12 +33,12 @@ public record FormLightModel
     /// <summary>
     /// The datetime of the activity start
     /// </summary>
-    public DateTime? StartDate {get;set;} = DateTime.Now;
+    public DateTime? StartDate {get;set;}
 
     /// <summary>
     /// The datetime of the activity end
     /// </summary>
-    public DateTime? EndDate {get;set;} = DateTime.Now;
+    public DateTime? EndDate {get;set;}
 
     /// <summary>
     /// Form's logo (changed from a raw string to an actual data structure)
@@ -53,7 +53,7 @@ public record FormLightModel
     /// <summary>
     /// Form's private title (optional ?)
     /// </summary>
-    public string? PrivateTitle { get; set; } = "";
+    public string? PrivateTitle { get; set; }
 
     /// <summary>
     /// Url of the widget button
@@ -78,7 +78,7 @@ public record FormLightModel
     /// <summary>
     /// Url of the counter widget
     /// </summary>
-    public string? WidgetCounterUrl  { get; set; } = "";
+    public string? WidgetCounterUrl  { get; set; }
 
     /// <summary>
     /// Form's slug (should be filled in, that's the key of queries)
